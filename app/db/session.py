@@ -1,3 +1,5 @@
+"""Configuración de la sesión asíncrona de SQLAlchemy para Supabase Postgres."""
+
 from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -10,5 +12,6 @@ AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_co
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Dependencia de FastAPI que provee una sesión de base de datos por request."""
     async with AsyncSessionLocal() as session:
         yield session

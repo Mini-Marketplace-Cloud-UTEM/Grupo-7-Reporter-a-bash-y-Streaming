@@ -1,3 +1,13 @@
+"""
+Servicio de recálculo batch de agregaciones analíticas.
+
+Lee los logs de eventos crudos desde el bucket 'event-logs' de Supabase Storage
+y recalcula las métricas en Supabase Postgres. Actúa como mecanismo de failover
+ante pérdida de mensajes en el canal de streaming (Pub/Sub).
+
+Al finalizar, los registros del rango procesado quedan marcados como BATCH_RECALCULATED.
+"""
+
 import json
 import logging
 from datetime import date, datetime, timezone
@@ -15,7 +25,16 @@ logger = logging.getLogger(__name__)
 
 
 async def run_batch_recalculate(db: AsyncSession, from_date: date | None, to_date: date | None, job_id: UUID) -> None:
-    logger.info("batch_recalculate_start job_id=%s from=%s to=%s", job_id, from_date, to_date)
+    """
+    Ejecuta el recálculo completo de agregaciones para el rango de fechas indicado.
+
+    Pasos:
+        1. Lista todos los archivos de log en el bucket de Supabase Storage.
+        2. Descarga y parsea cada archivo; filtra por rango de fechas si se especificó.
+        3. Reproesa cada evento relevante actualizando las tablas analíticas.
+        4. Marca los registros del rango como BATCH_RECALCULATED.
+    """
+    logger.info("recalculo_batch_inicio job_id=%s desde=%s hasta=%s", job_id, from_date, to_date)
     try:
         client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
         bucket = "event-logs"
@@ -41,6 +60,7 @@ async def run_batch_recalculate(db: AsyncSession, from_date: date | None, to_dat
                 except ValueError:
                     occurred_at = datetime.now(timezone.utc)
 
+                # Filtrar por rango de fechas si fue especificado en la solicitud
                 if from_date and occurred_at.date() < from_date:
                     continue
                 if to_date and occurred_at.date() > to_date:
@@ -52,11 +72,11 @@ async def run_batch_recalculate(db: AsyncSession, from_date: date | None, to_dat
                     processed += 1
 
                 elif event_type == "PaymentApproved":
+                    # Por ahora los pagos no modifican fact_sales_summary directamente
                     pass
 
-        # Marcar registros del rango como BATCH_RECALCULATED
+        # Marcar todos los registros del rango como recalculados por proceso batch
         from sqlalchemy import update, func as sa_func
-        from app.models.analytics import FactSalesSummary
 
         stmt = (
             update(FactSalesSummary)
@@ -75,6 +95,6 @@ async def run_batch_recalculate(db: AsyncSession, from_date: date | None, to_dat
         await db.execute(stmt)
         await db.commit()
 
-        logger.info("batch_recalculate_done job_id=%s processed_events=%d", job_id, processed)
+        logger.info("recalculo_batch_completado job_id=%s eventos_procesados=%d", job_id, processed)
     except Exception:
-        logger.exception("batch_recalculate_error job_id=%s", job_id)
+        logger.exception("recalculo_batch_error job_id=%s", job_id)

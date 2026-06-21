@@ -1,3 +1,11 @@
+"""
+Worker de consumo de eventos desde Google Cloud Pub/Sub.
+
+Se suscribe a los cuatro tópicos del ecosistema y despacha cada mensaje
+al handler correspondiente según el campo eventType del envelope estándar.
+Implementa reintentos con Exponential Backoff (máximo 5 intentos) usando tenacity.
+"""
+
 import asyncio
 import json
 import logging
@@ -25,36 +33,41 @@ _executor = ThreadPoolExecutor(max_workers=4)
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_order_created(payload: dict, correlation_id: str) -> None:
+    """Acumula las ventas del pedido en fact_sales_summary (modo REAL_TIME)."""
     data = OrderCreatedPayload(**payload)
     async with AsyncSessionLocal() as db:
         await upsert_sales_from_order(db, data.createdAt, Decimal(str(data.totalAmount)), correlation_id)
-    logger.info("order_created orderId=%s correlationId=%s", data.orderId, correlation_id)
+    logger.info("evento_order_created orderId=%s correlationId=%s", data.orderId, correlation_id)
 
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_payment_approved(payload: dict, correlation_id: str) -> None:
+    """Registra la aprobación del pago. Por ahora solo se loguea para trazabilidad."""
     data = PaymentApprovedPayload(**payload)
-    logger.info("payment_approved paymentId=%s orderId=%s correlationId=%s", data.paymentId, data.orderId, correlation_id)
+    logger.info("evento_payment_approved paymentId=%s orderId=%s correlationId=%s", data.paymentId, data.orderId, correlation_id)
 
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_inventory_shortage(payload: dict, correlation_id: str) -> None:
+    """Registra la alerta de quiebre de stock para análisis posterior."""
     data = InventoryShortagePayload(**payload)
     logger.warning(
-        "inventory_shortage productId=%s currentStock=%d requested=%d correlationId=%s",
+        "evento_inventory_shortage productId=%s stockActual=%d solicitado=%d correlationId=%s",
         data.productId, data.currentStock, data.requestedQuantity, correlation_id,
     )
 
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_shipment_delivered(payload: dict, correlation_id: str) -> None:
+    """Registra la entrega del envío para métricas de rendimiento de despacho."""
     data = ShipmentDeliveredPayload(**payload)
     logger.info(
-        "shipment_delivered shipmentId=%s orderId=%s city=%s correlationId=%s",
+        "evento_shipment_delivered envioId=%s pedidoId=%s ciudad=%s correlationId=%s",
         data.shipment_id, data.order_id, data.city, correlation_id,
     )
 
 
+# Mapa de tipo de evento a su handler correspondiente
 _HANDLERS = {
     "OrderCreated": _handle_order_created,
     "PaymentApproved": _handle_payment_approved,
@@ -64,6 +77,12 @@ _HANDLERS = {
 
 
 def _make_callback(loop: asyncio.AbstractEventLoop):
+    """
+    Genera la función de callback para el cliente de Pub/Sub.
+
+    El cliente de Pub/Sub opera en un hilo separado, por lo que se usa
+    run_coroutine_threadsafe para despachar al event loop principal de asyncio.
+    """
     def callback(message: pubsub_v1.subscriber.message.Message) -> None:
         try:
             raw = json.loads(message.data.decode("utf-8"))
@@ -76,16 +95,17 @@ def _make_callback(loop: asyncio.AbstractEventLoop):
                 future.result(timeout=30)
                 message.ack()
             else:
-                logger.warning("unknown_event_type type=%s", envelope.eventType)
+                logger.warning("tipo_evento_desconocido tipo=%s", envelope.eventType)
                 message.ack()
         except Exception:
-            logger.exception("pubsub_callback_error message_id=%s", message.message_id)
+            logger.exception("error_callback_pubsub message_id=%s", message.message_id)
             message.nack()
 
     return callback
 
 
 async def start_consumers() -> list:
+    """Inicia la suscripción a las cuatro colas de Pub/Sub y retorna los futures activos."""
     loop = asyncio.get_running_loop()
     subscriber = pubsub_v1.SubscriberClient()
     callback = _make_callback(loop)
@@ -103,11 +123,12 @@ async def start_consumers() -> list:
             continue
         future = subscriber.subscribe(sub, callback=callback)
         futures.append(future)
-        logger.info("pubsub_subscribed subscription=%s", sub)
+        logger.info("suscripcion_pubsub_activa suscripcion=%s", sub)
 
     return futures
 
 
 async def stop_consumers(futures: list) -> None:
+    """Cancela todos los futures de suscripción activos al apagar el servicio."""
     for future in futures:
         future.cancel()

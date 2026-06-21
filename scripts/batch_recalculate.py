@@ -1,6 +1,12 @@
 """
-Script standalone para recálculo batch — ejecutado por GitHub Actions (cron nocturno).
-Uso: python scripts/batch_recalculate.py [--from YYYY-MM-DD] [--to YYYY-MM-DD]
+Script standalone de recálculo batch — ejecutado por GitHub Actions (cron nocturno).
+
+Uso:
+    python scripts/batch_recalculate.py [--from YYYY-MM-DD] [--to YYYY-MM-DD]
+
+Ejemplos:
+    python scripts/batch_recalculate.py --from 2025-06-01 --to 2025-06-30
+    python scripts/batch_recalculate.py   # recalcula todo el histórico
 """
 
 import argparse
@@ -23,22 +29,25 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 
 def parse_date(value: str) -> date:
+    """Convierte una cadena YYYY-MM-DD a objeto date."""
     return date.fromisoformat(value)
 
 
 async def main() -> None:
-    parser = argparse.ArgumentParser(description="Batch recalculate analytics")
-    parser.add_argument("--from", dest="from_date", type=parse_date, default=None)
-    parser.add_argument("--to", dest="to_date", type=parse_date, default=None)
+    parser = argparse.ArgumentParser(
+        description="Recalcula las agregaciones analíticas desde los logs almacenados en Supabase Storage."
+    )
+    parser.add_argument("--from", dest="from_date", type=parse_date, default=None, help="Fecha de inicio (YYYY-MM-DD)")
+    parser.add_argument("--to", dest="to_date", type=parse_date, default=None, help="Fecha de fin (YYYY-MM-DD)")
     args = parser.parse_args()
 
     job_id = uuid.uuid4()
-    logging.info("Starting batch recalculate job_id=%s from=%s to=%s", job_id, args.from_date, args.to_date)
+    logging.info("Iniciando recálculo batch job_id=%s desde=%s hasta=%s", job_id, args.from_date, args.to_date)
 
     async with AsyncSessionLocal() as db:
         await run_batch_recalculate(db, args.from_date, args.to_date, job_id)
 
-    logging.info("Batch recalculate completed job_id=%s", job_id)
+    logging.info("Recálculo batch completado job_id=%s", job_id)
 
 
 if __name__ == "__main__":

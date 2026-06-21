@@ -1,3 +1,11 @@
+"""
+Servicio de consultas analíticas sobre Supabase Postgres.
+
+Contiene la lógica de negocio para cada endpoint de reportería y las
+funciones de upsert que el worker de Pub/Sub utiliza para actualizar
+las métricas en tiempo real.
+"""
+
 from datetime import date, datetime, timezone
 from decimal import Decimal
 
@@ -23,6 +31,7 @@ async def get_sales_report(
     from_date: date | None,
     to_date: date | None,
 ) -> SalesReport:
+    """Suma el total de ventas y pedidos dentro del rango de fechas indicado."""
     stmt = select(
         func.sum(FactSalesSummary.total_sales_amount),
         func.sum(FactSalesSummary.total_orders_count),
@@ -46,8 +55,12 @@ async def get_sales_report(
 
 
 async def get_orders_by_status(db: AsyncSession) -> list[OrderStatusCount]:
-    # fact_sales_summary no tiene columna de estado; se agrega desde logs de eventos.
-    # Por ahora retorna datos desde una vista o query raw si existe, sino vacío.
+    """
+    Retorna el conteo de pedidos agrupados por estado.
+
+    Los datos provienen de order_status_log, tabla auxiliar poblada
+    por el worker al procesar eventos OrderCreated y actualizaciones de estado.
+    """
     raw = await db.execute(text("SELECT status, COUNT(*) as count FROM order_status_log GROUP BY status"))
     rows = raw.fetchall()
     if not rows:
@@ -56,6 +69,7 @@ async def get_orders_by_status(db: AsyncSession) -> list[OrderStatusCount]:
 
 
 async def get_top_products(db: AsyncSession, page: int, page_size: int) -> TopProductsResponse:
+    """Retorna el ranking paginado de productos ordenados por unidades vendidas."""
     count_result = await db.execute(select(func.count()).select_from(AggTopProduct))
     total_items = count_result.scalar() or 0
 
@@ -68,6 +82,7 @@ async def get_top_products(db: AsyncSession, page: int, page_size: int) -> TopPr
     result = await db.execute(stmt)
     products = result.scalars().all()
 
+    # Techo entero para evitar que colecciones vacías retornen 0 páginas
     total_pages = max(1, -(-total_items // page_size))
 
     return TopProductsResponse(
@@ -89,6 +104,7 @@ async def get_top_products(db: AsyncSession, page: int, page_size: int) -> TopPr
 
 
 async def get_average_ticket(db: AsyncSession) -> AverageTicketResponse:
+    """Calcula el ticket promedio como total_ventas / total_pedidos sobre el histórico completo."""
     result = await db.execute(
         select(
             func.sum(FactSalesSummary.total_sales_amount),
@@ -103,6 +119,7 @@ async def get_average_ticket(db: AsyncSession) -> AverageTicketResponse:
 
 
 async def get_peak_hours(db: AsyncSession) -> list[PeakHourItem]:
+    """Agrupa la cantidad de pedidos por hora del día (0–23) según period_date."""
     raw = await db.execute(
         text(
             "SELECT EXTRACT(HOUR FROM period_date)::int AS hour, SUM(total_orders_count)::int AS order_count "
@@ -114,6 +131,12 @@ async def get_peak_hours(db: AsyncSession) -> list[PeakHourItem]:
 
 
 async def get_delivery_performance(db: AsyncSession) -> DeliveryPerformanceResponse:
+    """
+    Retorna el tiempo promedio de entrega y el total de envíos completados.
+
+    Los datos provienen de shipment_delivery_log, tabla auxiliar poblada
+    por el worker al procesar eventos ShipmentDelivered.
+    """
     raw = await db.execute(
         text(
             "SELECT AVG(delivery_time_minutes)::int, COUNT(*)::int "
@@ -127,6 +150,12 @@ async def get_delivery_performance(db: AsyncSession) -> DeliveryPerformanceRespo
 
 
 async def upsert_sales_from_order(db: AsyncSession, period_date: datetime, amount: Decimal, correlation_id: str) -> None:
+    """
+    Acumula ventas del día en fact_sales_summary (modo REAL_TIME).
+
+    Si ya existe un registro para el mismo día lo incrementa;
+    de lo contrario crea uno nuevo.
+    """
     existing = await db.execute(
         select(FactSalesSummary).where(
             func.date_trunc("day", FactSalesSummary.period_date) == func.date_trunc("day", period_date)
@@ -151,6 +180,7 @@ async def upsert_sales_from_order(db: AsyncSession, period_date: datetime, amoun
 
 
 async def upsert_top_product(db: AsyncSession, product_id: str, units: int, revenue: Decimal) -> None:
+    """Acumula unidades vendidas e ingresos por producto en agg_top_products."""
     existing = await db.execute(select(AggTopProduct).where(AggTopProduct.product_id == product_id))
     record = existing.scalar_one_or_none()
     if record:

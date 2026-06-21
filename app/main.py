@@ -20,12 +20,12 @@ async def lifespan(app: FastAPI):
     global _pubsub_futures
     try:
         _pubsub_futures = await start_consumers()
-        logger.info("pubsub_consumers_started count=%d", len(_pubsub_futures))
+        logger.info("consumidores_pubsub_iniciados cantidad=%d", len(_pubsub_futures))
     except Exception:
         logger.exception("pubsub_inicio_fallido — servicio funcionando sin consumidor de streaming")
     yield
     await stop_consumers(_pubsub_futures)
-    logger.info("pubsub_consumers_stopped")
+    logger.info("consumidores_pubsub_detenidos")
 
 
 app = FastAPI(
@@ -51,7 +51,7 @@ async def inject_request_id(request: Request, call_next):
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     correlation_id = request.headers.get("X-Correlation-Id")
-    logger.exception("unhandled_error path=%s", request.url.path)
+    logger.exception("error_no_manejado ruta=%s", request.url.path)
     return JSONResponse(
         status_code=500,
         content={
