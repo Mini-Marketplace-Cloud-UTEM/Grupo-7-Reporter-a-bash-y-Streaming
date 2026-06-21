@@ -1,0 +1,60 @@
+from datetime import datetime, timezone
+from uuid import UUID
+
+from fastapi import Header, HTTPException
+
+
+async def require_headers(
+    x_request_id: str = Header(..., alias="X-Request-Id"),
+    x_correlation_id: str = Header(..., alias="X-Correlation-Id"),
+    x_consumer: str = Header(..., alias="X-Consumer"),
+) -> dict:
+    """Valida que los tres headers obligatorios estén presentes y sean UUID válidos."""
+    for name, value in [("X-Request-Id", x_request_id), ("X-Correlation-Id", x_correlation_id)]:
+        try:
+            UUID(value)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "status": 400,
+                    "code": "INVALID_HEADER",
+                    "message": f"El header {name} debe ser un UUID válido",
+                    "correlationId": None,
+                },
+            )
+    return {"x_request_id": x_request_id, "x_correlation_id": x_correlation_id, "x_consumer": x_consumer}
+
+
+async def require_headers_with_idempotency(
+    x_request_id: str = Header(..., alias="X-Request-Id"),
+    x_correlation_id: str = Header(..., alias="X-Correlation-Id"),
+    x_consumer: str = Header(..., alias="X-Consumer"),
+    idempotency_key: str = Header(..., alias="Idempotency-Key"),
+) -> dict:
+    """Valida los tres headers obligatorios más Idempotency-Key para operaciones críticas."""
+    for name, value in [
+        ("X-Request-Id", x_request_id),
+        ("X-Correlation-Id", x_correlation_id),
+        ("Idempotency-Key", idempotency_key),
+    ]:
+        try:
+            UUID(value)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "status": 400,
+                    "code": "INVALID_HEADER",
+                    "message": f"El header {name} debe ser un UUID válido",
+                    "correlationId": None,
+                },
+            )
+    return {
+        "x_request_id": x_request_id,
+        "x_correlation_id": x_correlation_id,
+        "x_consumer": x_consumer,
+        "idempotency_key": idempotency_key,
+    }
