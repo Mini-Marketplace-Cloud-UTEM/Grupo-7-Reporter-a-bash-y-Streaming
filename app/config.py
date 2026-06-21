@@ -6,11 +6,20 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Parámetros de configuración del servicio de Reportería."""
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        # Ignora variables de entorno del SO / Docker que no estén declaradas aquí
+        # (p. ej. PUBSUB_EMULATOR_HOST que consume el cliente de Pub/Sub directamente).
+        extra="ignore",
+    )
 
     # Entorno de ejecución
     APP_ENV: str = "development"
     APP_PORT: int = 8070
+
+    # Mocks — cuando es True el middleware mock_status intercepta X-MOCK-HTTP-STATUS
+    USE_MOCKS: bool = False
 
     # Supabase (base de datos y storage)
     SUPABASE_URL: str = ""

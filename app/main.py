@@ -7,6 +7,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.routes import batch, reports
+from app.middleware.mock_status import MockStatusMiddleware
 from app.workers.pubsub_consumer import start_consumers, stop_consumers
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -38,6 +39,13 @@ app = FastAPI(
     ),
     lifespan=lifespan,
 )
+
+# ── Middlewares globales ──────────────────────────────────────────────────
+# El orden de registro en FastAPI/Starlette es LIFO: el último registrado
+# se ejecuta primero.  MockStatusMiddleware va primero en el stack para que
+# pueda sobreescribir el status_code después de que toda la cadena procese
+# la petición (incluyendo inject_request_id).
+app.add_middleware(MockStatusMiddleware)
 
 
 @app.middleware("http")
