@@ -1,0 +1,458 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-06-23T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app",
+  "resources": [
+    {
+      "_id": "wrk_grupo7",
+      "_type": "workspace",
+      "name": "Grupo 7 — Reportería, Batch y Streaming",
+      "description": "Colección para el servicio de reportería analítica del Mini Marketplace. Incluye peticiones normales y variantes con X-MOCK-HTTP-STATUS (requiere USE_MOCKS=true en el servidor).",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_grupo7",
+      "name": "Base (localhost — Mock activo)",
+      "data": {
+        "base_url": "http://localhost:8070",
+        "request_id": "00000000-0000-0000-0000-000000000001",
+        "correlation_id": "00000000-0000-0000-0000-000000000002",
+        "consumer": "bff-grupo1",
+        "idempotency_key": "00000000-0000-0000-0000-000000000003"
+      },
+      "isPrivate": false
+    },
+
+    {
+      "_id": "fld_utilidades",
+      "_type": "request_group",
+      "parentId": "wrk_grupo7",
+      "name": "Utilidades",
+      "description": "Endpoints de operación y monitoreo del servicio."
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "parentId": "fld_utilidades",
+      "name": "GET /health",
+      "method": "GET",
+      "url": "{{ _.base_url }}/health",
+      "headers": [],
+      "body": {},
+      "description": "Healthcheck del servicio. No requiere headers obligatorios."
+    },
+
+    {
+      "_id": "fld_reports",
+      "_type": "request_group",
+      "parentId": "wrk_grupo7",
+      "name": "Reportes — Respuestas reales",
+      "description": "Peticiones normales sin mock. El servidor responde con datos reales de la base de datos."
+    },
+    {
+      "_id": "req_sales",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "GET /reports/sales",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Resumen financiero consolidado (todo el histórico)."
+    },
+    {
+      "_id": "req_sales_periodo",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "GET /reports/sales (con rango de fechas)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [
+        { "name": "from",   "value": "2025-01-01" },
+        { "name": "to",     "value": "2025-12-31" }
+      ],
+      "body": {},
+      "description": "Resumen financiero filtrado por rango de fechas."
+    },
+    {
+      "_id": "req_orders_status",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "GET /reports/orders-by-status",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/orders-by-status",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Conteo de pedidos agrupados por estado (PENDING, CONFIRMED, DELIVERED, etc.)."
+    },
+    {
+      "_id": "req_top_products",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "GET /reports/top-products",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/top-products",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [
+        { "name": "page",     "value": "1" },
+        { "name": "pageSize", "value": "10" }
+      ],
+      "body": {},
+      "description": "Ranking paginado de productos más vendidos."
+    },
+    {
+      "_id": "req_average_ticket",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "GET /reports/average-ticket",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/average-ticket",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Ticket promedio de compra en CLP."
+    },
+    {
+      "_id": "req_peak_hours",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "GET /reports/peak-hours",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/peak-hours",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Franjas horarias con mayor volumen de transacciones (0–23)."
+    },
+    {
+      "_id": "req_delivery",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "GET /reports/delivery-performance",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/delivery-performance",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Tiempos promedio de entrega (Lead Time) y total de envíos completados."
+    },
+    {
+      "_id": "req_batch",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "POST /reports/batch/recalculate",
+      "method": "POST",
+      "url": "{{ _.base_url }}/reports/batch/recalculate",
+      "headers": [
+        { "name": "Content-Type",    "value": "application/json" },
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" },
+        { "name": "Idempotency-Key", "value": "{{ _.idempotency_key }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"from\": \"2025-01-01\",\n  \"to\": \"2025-12-31\"\n}"
+      },
+      "description": "Dispara recálculo batch asíncrono. Responde 202 QUEUED inmediatamente. Requiere Idempotency-Key único por ejecución."
+    },
+    {
+      "_id": "req_batch_sin_rango",
+      "_type": "request",
+      "parentId": "fld_reports",
+      "name": "POST /reports/batch/recalculate (sin rango)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/reports/batch/recalculate",
+      "headers": [
+        { "name": "Content-Type",    "value": "application/json" },
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" },
+        { "name": "Idempotency-Key", "value": "{{ _.idempotency_key }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "description": "Recálculo batch sobre todo el histórico sin filtro de fecha."
+    },
+
+    {
+      "_id": "fld_mock",
+      "_type": "request_group",
+      "parentId": "wrk_grupo7",
+      "name": "Mocks — X-MOCK-HTTP-STATUS (USE_MOCKS=true)",
+      "description": "Peticiones con el header X-MOCK-HTTP-STATUS activo. Requiere USE_MOCKS=true en el servidor (.env). El cuerpo de la respuesta es real; solo el status code es reemplazado."
+    },
+
+    {
+      "_id": "req_mock_503_sales",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "GET /reports/sales → 503 Service Unavailable",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "503" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Simula un 503 Service Unavailable en ventas. Útil para que el BFF pruebe su lógica de retry/fallback."
+    },
+    {
+      "_id": "req_mock_429_products",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "GET /reports/top-products → 429 Too Many Requests",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/top-products",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "429" }
+      ],
+      "parameters": [
+        { "name": "page",     "value": "1" },
+        { "name": "pageSize", "value": "10" }
+      ],
+      "body": {},
+      "description": "Simula un 429 Too Many Requests en top-products."
+    },
+    {
+      "_id": "req_mock_500_orders",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "GET /reports/orders-by-status → 500 Internal Server Error",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/orders-by-status",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "500" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Simula un 500 Internal Server Error en orders-by-status."
+    },
+    {
+      "_id": "req_mock_401_ticket",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "GET /reports/average-ticket → 401 Unauthorized",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/average-ticket",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "401" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Simula un 401 Unauthorized en average-ticket."
+    },
+    {
+      "_id": "req_mock_404_peak",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "GET /reports/peak-hours → 404 Not Found",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/peak-hours",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "404" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Simula un 404 Not Found en peak-hours."
+    },
+    {
+      "_id": "req_mock_503_delivery",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "GET /reports/delivery-performance → 503 Service Unavailable",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/delivery-performance",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "503" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Simula un 503 en delivery-performance."
+    },
+    {
+      "_id": "req_mock_409_batch",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "POST /reports/batch/recalculate → 409 Conflict (idempotencia)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/reports/batch/recalculate",
+      "headers": [
+        { "name": "Content-Type",       "value": "application/json" },
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "Idempotency-Key",    "value": "{{ _.idempotency_key }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "409" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "description": "Simula un conflicto de idempotencia 409 en batch/recalculate sin necesidad de duplicar la petición real."
+    },
+    {
+      "_id": "req_mock_422_sales",
+      "_type": "request",
+      "parentId": "fld_mock",
+      "name": "GET /reports/sales → 422 Unprocessable Entity",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "422" }
+      ],
+      "parameters": [
+        { "name": "from", "value": "2025-01-01" },
+        { "name": "to",   "value": "2025-12-31" }
+      ],
+      "body": {},
+      "description": "Simula un 422 Unprocessable Entity en ventas con rango de fechas."
+    },
+
+    {
+      "_id": "fld_errores",
+      "_type": "request_group",
+      "parentId": "wrk_grupo7",
+      "name": "Errores de validación — Headers faltantes",
+      "description": "Peticiones intencionalmente malformadas para verificar que la API devuelve 400 correctamente ante headers obligatorios ausentes o inválidos."
+    },
+    {
+      "_id": "req_sin_headers",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "GET /reports/sales — sin headers obligatorios → 422",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [],
+      "parameters": [],
+      "body": {},
+      "description": "FastAPI devuelve 422 cuando faltan X-Request-Id, X-Correlation-Id o X-Consumer."
+    },
+    {
+      "_id": "req_uuid_invalido",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "GET /reports/sales — X-Request-Id no UUID → 400",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "no-es-un-uuid" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "La dependencia require_headers valida que X-Request-Id sea un UUID válido y devuelve 400 INVALID_HEADER."
+    },
+    {
+      "_id": "req_batch_sin_idempotency",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "POST /reports/batch/recalculate — sin Idempotency-Key → 422",
+      "method": "POST",
+      "url": "{{ _.base_url }}/reports/batch/recalculate",
+      "headers": [
+        { "name": "Content-Type",    "value": "application/json" },
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "description": "FastAPI devuelve 422 cuando falta el header Idempotency-Key obligatorio para batch/recalculate."
+    },
+    {
+      "_id": "req_mock_invalido",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "GET /reports/sales — X-MOCK-HTTP-STATUS inválido (ignorado)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "abc" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Valor no entero en X-MOCK-HTTP-STATUS: el middleware lo ignora y responde con el status real (+ warning en log del servidor)."
+    },
+    {
+      "_id": "req_mock_fuera_rango",
+      "_type": "request",
+      "parentId": "fld_errores",
+      "name": "GET /reports/sales — X-MOCK-HTTP-STATUS fuera de rango (ignorado)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-MOCK-HTTP-STATUS", "value": "99" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Valor 99 está fuera del rango 100–599: el middleware lo ignora y responde con el status real (+ warning en log del servidor)."
+    }
+  ]
+}
