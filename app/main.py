@@ -92,7 +92,7 @@ X-MOCK-HTTP-STATUS: 503
 **Simular un 503 Service Unavailable en el reporte de ventas:**
 ```bash
 curl -s -o /dev/null -w "%{http_code}" \\
-  http://localhost:8070/reports/sales \\
+  https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/sales \\
   -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
   -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
   -H "X-Consumer: bff-grupo1" \\
@@ -103,7 +103,7 @@ curl -s -o /dev/null -w "%{http_code}" \\
 **Simular un 429 Too Many Requests en top-products:**
 ```bash
 curl -s -o /dev/null -w "%{http_code}" \\
-  "http://localhost:8070/reports/top-products?page=1&pageSize=10" \\
+  "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/top-products?page=1&pageSize=10" \\
   -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
   -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
   -H "X-Consumer: bff-grupo1" \\
@@ -113,7 +113,7 @@ curl -s -o /dev/null -w "%{http_code}" \\
 
 **Simular un 202 en batch/recalculate (comportamiento real) para verificar idempotencia:**
 ```bash
-curl -s -X POST http://localhost:8070/reports/batch/recalculate \\
+curl -s -X POST https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/batch/recalculate \\
   -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
   -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
   -H "X-Consumer: bff-grupo1" \\

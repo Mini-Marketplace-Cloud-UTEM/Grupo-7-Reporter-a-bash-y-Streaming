@@ -367,6 +367,328 @@
     },
 
     {
+      "_id": "fld_mock_data",
+      "_type": "request_group",
+      "parentId": "wrk_grupo7",
+      "name": "Mock — Respuestas completas (datos simulados)",
+      "description": "Solicitudes con respuestas de ejemplo precargadas con datos mock realistas. Cada request tiene una respuesta guardada que refleja el schema exacto del contrato OpenAPI. Útil para demostración sin base de datos y para que el BFF valide su parsing."
+    },
+
+    {
+      "_id": "req_mock_data_sales",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "GET /reports/sales → 200 (mock histórico completo)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Ejemplo de respuesta real: resumen financiero del histórico completo (1 148 pedidos, $87 320 000 CLP)."
+    },
+    {
+      "_id": "res_mock_data_sales",
+      "_type": "response",
+      "parentId": "req_mock_data_sales",
+      "statusCode": 200,
+      "statusMessage": "OK",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/sales",
+      "body": "ewogICJwZXJpb2QiOiB7CiAgICAiZnJvbSI6IG51bGwsCiAgICAidG8iOiBudWxsCiAgfSwKICAidG90YWxTYWxlcyI6IDg3MzIwMDAwLAogICJ0b3RhbE9yZGVycyI6IDExNDgsCiAgImN1cnJlbmN5IjogIkNMUCIKfQ==",
+      "bytesRead": 124,
+      "bytesContent": 124,
+      "elapsedTime": 87,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
+      "_id": "req_mock_data_sales_periodo",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "GET /reports/sales → 200 (mock rango 2025)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/sales",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [
+        { "name": "from", "value": "2025-01-01" },
+        { "name": "to",   "value": "2025-12-31" }
+      ],
+      "body": {},
+      "description": "Ejemplo de respuesta real: ventas filtradas por año 2025 (312 pedidos, $24 850 000 CLP)."
+    },
+    {
+      "_id": "res_mock_data_sales_periodo",
+      "_type": "response",
+      "parentId": "req_mock_data_sales_periodo",
+      "statusCode": 200,
+      "statusMessage": "OK",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/sales?from=2025-01-01&to=2025-12-31",
+      "body": "ewogICJwZXJpb2QiOiB7CiAgICAiZnJvbSI6ICIyMDI1LTAxLTAxIiwKICAgICJ0byI6ICIyMDI1LTEyLTMxIgogIH0sCiAgInRvdGFsU2FsZXMiOiAyNDg1MDAwMCwKICAidG90YWxPcmRlcnMiOiAzMTIsCiAgImN1cnJlbmN5IjogIkNMUCIKfQ==",
+      "bytesRead": 139,
+      "bytesContent": 139,
+      "elapsedTime": 64,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
+      "_id": "req_mock_data_orders",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "GET /reports/orders-by-status → 200 (mock)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/orders-by-status",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Ejemplo de respuesta real: distribución de 312 pedidos en 5 estados (DELIVERED 198, CONFIRMED 67, PENDING 31, CANCELLED 12, SHIPPED 4)."
+    },
+    {
+      "_id": "res_mock_data_orders",
+      "_type": "response",
+      "parentId": "req_mock_data_orders",
+      "statusCode": 200,
+      "statusMessage": "OK",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/orders-by-status",
+      "body": "WwogIHsKICAgICJzdGF0dXMiOiAiREVMSVZFUkVEIiwKICAgICJjb3VudCI6IDE5OAogIH0sCiAgewogICAgInN0YXR1cyI6ICJDT05GSVJNRUQiLAogICAgImNvdW50IjogNjcKICB9LAogIHsKICAgICJzdGF0dXMiOiAiUEVORElORyIsCiAgICAiY291bnQiOiAzMQogIH0sCiAgewogICAgInN0YXR1cyI6ICJDQU5DRUxMRUQiLAogICAgImNvdW50IjogMTIKICB9LAogIHsKICAgICJzdGF0dXMiOiAiU0hJUFBFRCIsCiAgICAiY291bnQiOiA0CiAgfQpd",
+      "bytesRead": 258,
+      "bytesContent": 258,
+      "elapsedTime": 72,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
+      "_id": "req_mock_data_top_products",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "GET /reports/top-products → 200 (mock pág. 1/5)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/top-products",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [
+        { "name": "page",     "value": "1" },
+        { "name": "pageSize", "value": "10" }
+      ],
+      "body": {},
+      "description": "Ejemplo de respuesta real: top 10 productos paginados (47 total, 5 páginas). Líder: Notebook Lenovo IdeaPad con 85 unidades y $4 250 000 CLP."
+    },
+    {
+      "_id": "res_mock_data_top_products",
+      "_type": "response",
+      "parentId": "req_mock_data_top_products",
+      "statusCode": 200,
+      "statusMessage": "OK",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/top-products?page=1&pageSize=10",
+      "body": "ewogICJkYXRhIjogWwogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMTAwIiwKICAgICAgIm5hbWUiOiAiTm90ZWJvb2sgTGVub3ZvIElkZWFQYWQiLAogICAgICAidW5pdHNTb2xkIjogODUsCiAgICAgICJyZXZlbnVlIjogNDI1MDAwMAogICAgfSwKICAgIHsKICAgICAgInByb2R1Y3RJZCI6ICJQLTA0MiIsCiAgICAgICJuYW1lIjogIk1vdXNlIEluYWzDoW1icmljbyBMb2dpdGVjaCIsCiAgICAgICJ1bml0c1NvbGQiOiA3NCwKICAgICAgInJldmVudWUiOiA4ODgwMDAKICAgIH0sCiAgICB7CiAgICAgICJwcm9kdWN0SWQiOiAiUC0yMDciLAogICAgICAibmFtZSI6ICJBdWTDrWZvbm9zIFNvbnkgV0gtMTAwMFhNNSIsCiAgICAgICJ1bml0c1NvbGQiOiA2MSwKICAgICAgInJldmVudWUiOiAzMDUwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMzE4IiwKICAgICAgIm5hbWUiOiAiVGVjbGFkbyBNZWPDoW5pY28gUmVkcmFnb24iLAogICAgICAidW5pdHNTb2xkIjogNTgsCiAgICAgICJyZXZlbnVlIjogMTE2MDAwMAogICAgfSwKICAgIHsKICAgICAgInByb2R1Y3RJZCI6ICJQLTA1NSIsCiAgICAgICJuYW1lIjogIk1vbml0b3IgU2Ftc3VuZyAyNyBwdWxnYWRhcyIsCiAgICAgICJ1bml0c1NvbGQiOiA1MiwKICAgICAgInJldmVudWUiOiA1MjAwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtNDExIiwKICAgICAgIm5hbWUiOiAiU2lsbGEgR2FtZXIgRFhSYWNlciIsCiAgICAgICJ1bml0c1NvbGQiOiA0OSwKICAgICAgInJldmVudWUiOiA0OTAwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMTIzIiwKICAgICAgIm5hbWUiOiAiV2ViY2FtIExvZ2l0ZWNoIEM5MjAiLAogICAgICAidW5pdHNTb2xkIjogNDMsCiAgICAgICJyZXZlbnVlIjogODYwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMjk5IiwKICAgICAgIm5hbWUiOiAiRGlzY28gU1NEIFNhbXN1bmcgMVRCIiwKICAgICAgInVuaXRzU29sZCI6IDM4LAogICAgICAicmV2ZW51ZSI6IDE1MjAwMDAKICAgIH0sCiAgICB7CiAgICAgICJwcm9kdWN0SWQiOiAiUC0wNzciLAogICAgICAibmFtZSI6ICJQYXJsYW50ZSBCbHVldG9vdGggSkJMIEZsaXAgNiIsCiAgICAgICJ1bml0c1NvbGQiOiAzNSwKICAgICAgInJldmVudWUiOiA3MDAwMDAKICAgIH0sCiAgICB7CiAgICAgICJwcm9kdWN0SWQiOiAiUC01MDEiLAogICAgICAibmFtZSI6ICJIdWIgVVNCLUMgNyBlbiAxIEFua2VyIiwKICAgICAgInVuaXRzU29sZCI6IDI5LAogICAgICAicmV2ZW51ZSI6IDU4MDAwMAogICAgfQogIF0sCiAgInBhZ2luYXRpb24iOiB7CiAgICAidG90YWxJdGVtcyI6IDQ3LAogICAgInRvdGFsUGFnZXMiOiA1LAogICAgImN1cnJlbnRQYWdlIjogMSwKICAgICJwYWdlU2l6ZSI6IDEwCiAgfQp9",
+      "bytesRead": 1431,
+      "bytesContent": 1431,
+      "elapsedTime": 95,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
+      "_id": "req_mock_data_ticket",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "GET /reports/average-ticket → 200 (mock)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/average-ticket",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Ejemplo de respuesta real: ticket promedio $79 647 CLP."
+    },
+    {
+      "_id": "res_mock_data_ticket",
+      "_type": "response",
+      "parentId": "req_mock_data_ticket",
+      "statusCode": 200,
+      "statusMessage": "OK",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/average-ticket",
+      "body": "ewogICJhdmVyYWdlVGlja2V0IjogNzk2NDcsCiAgImN1cnJlbmN5IjogIkNMUCIKfQ==",
+      "bytesRead": 49,
+      "bytesContent": 49,
+      "elapsedTime": 58,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
+      "_id": "req_mock_data_peak",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "GET /reports/peak-hours → 200 (mock)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/peak-hours",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Ejemplo de respuesta real: distribución horaria completa (horas 0-23). Peak: 19 h con 71 pedidos, seguido de 18 h con 63."
+    },
+    {
+      "_id": "res_mock_data_peak",
+      "_type": "response",
+      "parentId": "req_mock_data_peak",
+      "statusCode": 200,
+      "statusMessage": "OK",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/peak-hours",
+      "body": "WwogIHsKICAgICJob3VyIjogMCwKICAgICJvcmRlckNvdW50IjogNAogIH0sCiAgewogICAgImhvdXIiOiAxLAogICAgIm9yZGVyQ291bnQiOiAyCiAgfSwKICB7CiAgICAiaG91ciI6IDIsCiAgICAib3JkZXJDb3VudCI6IDEKICB9LAogIHsKICAgICJob3VyIjogMywKICAgICJvcmRlckNvdW50IjogMAogIH0sCiAgewogICAgImhvdXIiOiA0LAogICAgIm9yZGVyQ291bnQiOiAwCiAgfSwKICB7CiAgICAiaG91ciI6IDUsCiAgICAib3JkZXJDb3VudCI6IDEKICB9LAogIHsKICAgICJob3VyIjogNiwKICAgICJvcmRlckNvdW50IjogMwogIH0sCiAgewogICAgImhvdXIiOiA3LAogICAgIm9yZGVyQ291bnQiOiA4CiAgfSwKICB7CiAgICAiaG91ciI6IDgsCiAgICAib3JkZXJDb3VudCI6IDE0CiAgfSwKICB7CiAgICAiaG91ciI6IDksCiAgICAib3JkZXJDb3VudCI6IDIxCiAgfSwKICB7CiAgICAiaG91ciI6IDEwLAogICAgIm9yZGVyQ291bnQiOiAyNwogIH0sCiAgewogICAgImhvdXIiOiAxMSwKICAgICJvcmRlckNvdW50IjogMzUKICB9LAogIHsKICAgICJob3VyIjogMTIsCiAgICAib3JkZXJDb3VudCI6IDQ4CiAgfSwKICB7CiAgICAiaG91ciI6IDEzLAogICAgIm9yZGVyQ291bnQiOiA1MgogIH0sCiAgewogICAgImhvdXIiOiAxNCwKICAgICJvcmRlckNvdW50IjogNDQKICB9LAogIHsKICAgICJob3VyIjogMTUsCiAgICAib3JkZXJDb3VudCI6IDM4CiAgfSwKICB7CiAgICAiaG91ciI6IDE2LAogICAgIm9yZGVyQ291bnQiOiAzMQogIH0sCiAgewogICAgImhvdXIiOiAxNywKICAgICJvcmRlckNvdW50IjogMjkKICB9LAogIHsKICAgICJob3VyIjogMTgsCiAgICAib3JkZXJDb3VudCI6IDYzCiAgfSwKICB7CiAgICAiaG91ciI6IDE5LAogICAgIm9yZGVyQ291bnQiOiA3MQogIH0sCiAgewogICAgImhvdXIiOiAyMCwKICAgICJvcmRlckNvdW50IjogNTgKICB9LAogIHsKICAgICJob3VyIjogMjEsCiAgICAib3JkZXJDb3VudCI6IDQxCiAgfSwKICB7CiAgICAiaG91ciI6IDIyLAogICAgIm9yZGVyQ291bnQiOiAyMgogIH0sCiAgewogICAgImhvdXIiOiAyMywKICAgICJvcmRlckNvdW50IjogMTEKICB9Cl0=",
+      "bytesRead": 1088,
+      "bytesContent": 1088,
+      "elapsedTime": 79,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
+      "_id": "req_mock_data_delivery",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "GET /reports/delivery-performance → 200 (mock)",
+      "method": "GET",
+      "url": "{{ _.base_url }}/reports/delivery-performance",
+      "headers": [
+        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+      ],
+      "parameters": [],
+      "body": {},
+      "description": "Ejemplo de respuesta real: tiempo promedio de entrega 138 minutos (~2 h 18 min), 198 envíos completados."
+    },
+    {
+      "_id": "res_mock_data_delivery",
+      "_type": "response",
+      "parentId": "req_mock_data_delivery",
+      "statusCode": 200,
+      "statusMessage": "OK",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/delivery-performance",
+      "body": "ewogICJhdmdEZWxpdmVyeVRpbWVNaW51dGVzIjogMTM4LAogICJ0b3RhbERlbGl2ZXJlZENvdW50IjogMTk4Cn0=",
+      "bytesRead": 65,
+      "bytesContent": 65,
+      "elapsedTime": 61,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
+      "_id": "req_mock_data_batch",
+      "_type": "request",
+      "parentId": "fld_mock_data",
+      "name": "POST /reports/batch/recalculate → 202 (mock QUEUED)",
+      "method": "POST",
+      "url": "{{ _.base_url }}/reports/batch/recalculate",
+      "headers": [
+        { "name": "Content-Type",     "value": "application/json" },
+        { "name": "X-Request-Id",     "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer",       "value": "{{ _.consumer }}" },
+        { "name": "Idempotency-Key",  "value": "{{ _.idempotency_key }}" }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"from\": \"2025-01-01\",\n  \"to\": \"2025-12-31\"\n}"
+      },
+      "description": "Ejemplo de respuesta real: recálculo batch encolado. El jobId es el identificador único del trabajo asíncrono."
+    },
+    {
+      "_id": "res_mock_data_batch",
+      "_type": "response",
+      "parentId": "req_mock_data_batch",
+      "statusCode": 202,
+      "statusMessage": "Accepted",
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "contentType": "application/json",
+      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/batch/recalculate",
+      "body": "ewogICJqb2JJZCI6ICI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwOTkiLAogICJzdGF0dXMiOiAiUVVFVUVEIgp9",
+      "bytesRead": 75,
+      "bytesContent": 75,
+      "elapsedTime": 103,
+      "bodyCompression": null,
+      "error": "",
+      "requestVersionId": null,
+      "settingStoreCookies": true,
+      "settingSendCookies": true
+    },
+
+    {
       "_id": "fld_errores",
       "_type": "request_group",
       "parentId": "wrk_grupo7",
