@@ -17,7 +17,7 @@
       "parentId": "wrk_grupo7",
       "name": "Base (localhost — Mock activo)",
       "data": {
-        "base_url": "http://localhost:8070",
+        "base_url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app",
         "request_id": "00000000-0000-0000-0000-000000000001",
         "correlation_id": "00000000-0000-0000-0000-000000000002",
         "consumer": "bff-grupo1",
@@ -60,9 +60,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/sales",
       "headers": [
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [],
       "body": {},
@@ -76,13 +76,13 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/sales",
       "headers": [
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [
-        { "name": "from",   "value": "2025-01-01" },
-        { "name": "to",     "value": "2025-12-31" }
+        { "name": "from", "value": "2025-01-01" },
+        { "name": "to", "value": "2025-12-31" }
       ],
       "body": {},
       "description": "Resumen financiero filtrado por rango de fechas."
@@ -95,9 +95,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/orders-by-status",
       "headers": [
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [],
       "body": {},
@@ -111,12 +111,12 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/top-products",
       "headers": [
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [
-        { "name": "page",     "value": "1" },
+        { "name": "page", "value": "1" },
         { "name": "pageSize", "value": "10" }
       ],
       "body": {},
@@ -130,9 +130,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/average-ticket",
       "headers": [
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [],
       "body": {},
@@ -146,9 +146,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/peak-hours",
       "headers": [
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [],
       "body": {},
@@ -162,9 +162,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/delivery-performance",
       "headers": [
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [],
       "body": {},
@@ -178,10 +178,10 @@
       "method": "POST",
       "url": "{{ _.base_url }}/reports/batch/recalculate",
       "headers": [
-        { "name": "Content-Type",    "value": "application/json" },
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" },
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "Idempotency-Key", "value": "{{ _.idempotency_key }}" }
       ],
       "body": {
@@ -198,10 +198,10 @@
       "method": "POST",
       "url": "{{ _.base_url }}/reports/batch/recalculate",
       "headers": [
-        { "name": "Content-Type",    "value": "application/json" },
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" },
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "Idempotency-Key", "value": "{{ _.idempotency_key }}" }
       ],
       "body": {
@@ -227,9 +227,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/sales",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "503" }
       ],
       "parameters": [],
@@ -244,13 +244,13 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/top-products",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "429" }
       ],
       "parameters": [
-        { "name": "page",     "value": "1" },
+        { "name": "page", "value": "1" },
         { "name": "pageSize", "value": "10" }
       ],
       "body": {},
@@ -264,9 +264,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/orders-by-status",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "500" }
       ],
       "parameters": [],
@@ -281,9 +281,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/average-ticket",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "401" }
       ],
       "parameters": [],
@@ -298,9 +298,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/peak-hours",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "404" }
       ],
       "parameters": [],
@@ -315,9 +315,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/delivery-performance",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "503" }
       ],
       "parameters": [],
@@ -332,11 +332,11 @@
       "method": "POST",
       "url": "{{ _.base_url }}/reports/batch/recalculate",
       "headers": [
-        { "name": "Content-Type",       "value": "application/json" },
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
-        { "name": "Idempotency-Key",    "value": "{{ _.idempotency_key }}" },
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
+        { "name": "Idempotency-Key", "value": "{{ _.idempotency_key }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "409" }
       ],
       "body": {
@@ -353,14 +353,14 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/sales",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "422" }
       ],
       "parameters": [
         { "name": "from", "value": "2025-01-01" },
-        { "name": "to",   "value": "2025-12-31" }
+        { "name": "to", "value": "2025-12-31" }
       ],
       "body": {},
       "description": "Simula un 422 Unprocessable Entity en ventas con rango de fechas."
@@ -393,9 +393,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/sales",
       "headers": [
-        { "name": "X-Request-Id",    "value": "no-es-un-uuid" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "X-Request-Id", "value": "no-es-un-uuid" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "parameters": [],
       "body": {},
@@ -409,10 +409,10 @@
       "method": "POST",
       "url": "{{ _.base_url }}/reports/batch/recalculate",
       "headers": [
-        { "name": "Content-Type",    "value": "application/json" },
-        { "name": "X-Request-Id",    "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id","value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",      "value": "{{ _.consumer }}" }
+        { "name": "Content-Type", "value": "application/json" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" }
       ],
       "body": {
         "mimeType": "application/json",
@@ -428,9 +428,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/sales",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "abc" }
       ],
       "parameters": [],
@@ -445,9 +445,9 @@
       "method": "GET",
       "url": "{{ _.base_url }}/reports/sales",
       "headers": [
-        { "name": "X-Request-Id",       "value": "{{ _.request_id }}" },
-        { "name": "X-Correlation-Id",   "value": "{{ _.correlation_id }}" },
-        { "name": "X-Consumer",         "value": "{{ _.consumer }}" },
+        { "name": "X-Request-Id", "value": "{{ _.request_id }}" },
+        { "name": "X-Correlation-Id", "value": "{{ _.correlation_id }}" },
+        { "name": "X-Consumer", "value": "{{ _.consumer }}" },
         { "name": "X-MOCK-HTTP-STATUS", "value": "99" }
       ],
       "parameters": [],
