@@ -39,7 +39,7 @@ jobs:
           python-version: "3.11"
 
       - name: Instalar ruff
-        run: pip install ruff==0.4.4
+        run: pip install -r requirements-dev.txt
 
       - name: Ejecutar ruff check
         run: ruff check .
