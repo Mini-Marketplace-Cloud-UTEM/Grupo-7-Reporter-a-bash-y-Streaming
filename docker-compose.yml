@@ -1,15 +1,56 @@
 version: "3.9"
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-reporteria}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reporteria}
+      POSTGRES_DB: ${POSTGRES_DB:-reporteria}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reporteria}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: postgres:16-alpine
+    env_file:
+      - .env
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-reporteria}
+    volumes:
+      - ./migrations:/migrations
+    command: >
+      sh -c "psql -h postgres -U ${POSTGRES_USER:-reporteria} -d ${POSTGRES_DB:-reporteria} -f /migrations/001_initial_schema.sql"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
   api:
     build: .
     ports:
       - "8070:8070"
     env_file:
       - .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-reporteria}:${POSTGRES_PASSWORD:-reporteria}@postgres:5432/${POSTGRES_DB:-reporteria}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8070/health"]
       interval: 30s
       timeout: 5s
       retries: 3
+
+volumes:
+  postgres_data:
