@@ -12,7 +12,6 @@ from decimal import Decimal
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
 from app.models.analytics import AggTopProduct, FactSalesSummary
 from app.schemas.responses import (
     AverageTicketResponse,
@@ -32,9 +31,10 @@ async def get_sales_report(
     db: AsyncSession,
     from_date: date | None,
     to_date: date | None,
+    use_mocks: bool = False,
 ) -> SalesReport:
     """Suma el total de ventas y pedidos dentro del rango de fechas indicado."""
-    if settings.USE_MOCKS:
+    if use_mocks:
         return mock_data.sales_report(from_date, to_date)
 
     stmt = select(
@@ -69,14 +69,14 @@ async def get_sales_report(
     )
 
 
-async def get_orders_by_status(db: AsyncSession) -> list[OrderStatusCount]:
+async def get_orders_by_status(db: AsyncSession, use_mocks: bool = False) -> list[OrderStatusCount]:
     """
     Retorna el conteo de pedidos agrupados por estado.
 
     Los datos provienen de order_status_log, tabla auxiliar poblada
     por el worker al procesar eventos OrderCreated y actualizaciones de estado.
     """
-    if settings.USE_MOCKS:
+    if use_mocks:
         return mock_data.orders_by_status()
 
     raw = await db.execute(
@@ -88,9 +88,9 @@ async def get_orders_by_status(db: AsyncSession) -> list[OrderStatusCount]:
     return [OrderStatusCount(status=r[0], count=r[1]) for r in rows]
 
 
-async def get_top_products(db: AsyncSession, page: int, page_size: int) -> TopProductsResponse:
+async def get_top_products(db: AsyncSession, page: int, page_size: int, use_mocks: bool = False) -> TopProductsResponse:
     """Retorna el ranking paginado de productos ordenados por unidades vendidas."""
-    if settings.USE_MOCKS:
+    if use_mocks:
         return mock_data.top_products(page, page_size)
 
     count_result = await db.execute(select(func.count()).select_from(AggTopProduct))
@@ -126,9 +126,9 @@ async def get_top_products(db: AsyncSession, page: int, page_size: int) -> TopPr
     )
 
 
-async def get_average_ticket(db: AsyncSession) -> AverageTicketResponse:
+async def get_average_ticket(db: AsyncSession, use_mocks: bool = False) -> AverageTicketResponse:
     """Calcula el ticket promedio como total_ventas / total_pedidos sobre el histórico completo."""
-    if settings.USE_MOCKS:
+    if use_mocks:
         return mock_data.average_ticket()
 
     result = await db.execute(
@@ -144,9 +144,9 @@ async def get_average_ticket(db: AsyncSession) -> AverageTicketResponse:
     return AverageTicketResponse(averageTicket=avg)
 
 
-async def get_peak_hours(db: AsyncSession) -> list[PeakHourItem]:
+async def get_peak_hours(db: AsyncSession, use_mocks: bool = False) -> list[PeakHourItem]:
     """Agrupa la cantidad de pedidos por hora del día (0–23) según period_date."""
-    if settings.USE_MOCKS:
+    if use_mocks:
         return mock_data.peak_hours()
 
     raw = await db.execute(
@@ -159,14 +159,14 @@ async def get_peak_hours(db: AsyncSession) -> list[PeakHourItem]:
     return [PeakHourItem(hour=r[0], orderCount=r[1]) for r in rows]
 
 
-async def get_delivery_performance(db: AsyncSession) -> DeliveryPerformanceResponse:
+async def get_delivery_performance(db: AsyncSession, use_mocks: bool = False) -> DeliveryPerformanceResponse:
     """
     Retorna el tiempo promedio de entrega y el total de envíos completados.
 
     Los datos provienen de shipment_delivery_log, tabla auxiliar poblada
     por el worker al procesar eventos ShipmentDelivered.
     """
-    if settings.USE_MOCKS:
+    if use_mocks:
         return mock_data.delivery_performance()
 
     raw = await db.execute(

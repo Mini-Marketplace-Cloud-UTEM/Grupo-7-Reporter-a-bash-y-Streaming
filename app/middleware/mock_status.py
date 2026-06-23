@@ -1,17 +1,19 @@
 """
 Middleware de mock de status HTTP.
 
-Cuando USE_MOCKS=true, lee el header X-MOCK-HTTP-STATUS de la petición
-entrante y sustituye el status code real de la respuesta por el valor
-indicado.  Útil para que los consumidores del BFF prueben el manejo de
-errores sin necesidad de provocar condiciones reales de fallo.
+Cuando USE_MOCKS=true EN EL ENV y el header X-USE-MOCKS: true está presente,
+lee el header X-MOCK-HTTP-STATUS de la petición entrante y sustituye el
+status code real de la respuesta por el valor indicado. Útil para que los
+consumidores del BFF prueben el manejo de errores sin necesidad de provocar
+condiciones reales de fallo.
 
 Comportamiento:
-- Si USE_MOCKS es False  → el middleware es transparente (no-op).
-- Si USE_MOCKS es True y el header X-MOCK-HTTP-STATUS está ausente o es
-  inválido → la respuesta pasa sin modificaciones.
-- Si USE_MOCKS es True y el header contiene un entero HTTP válido (100-599)
-  → se reemplaza el status_code de la respuesta por ese valor.
+- Si USE_MOCKS es False en el env             → transparente (no-op).
+- Si USE_MOCKS es True pero falta X-USE-MOCKS: true → transparente (no-op).
+- Si ambas condiciones se cumplen y X-MOCK-HTTP-STATUS está ausente o inválido
+  → la respuesta pasa sin modificaciones.
+- Si ambas condiciones se cumplen y el header contiene un entero HTTP válido
+  (100-599) → se reemplaza el status_code de la respuesta por ese valor.
 """
 
 import logging
@@ -34,6 +36,9 @@ class MockStatusMiddleware(BaseHTTPMiddleware):
         response: Response = await call_next(request)
 
         if not settings.USE_MOCKS:
+            return response
+
+        if request.headers.get("X-USE-MOCKS", "").lower() != "true":
             return response
 
         raw = request.headers.get(_MOCK_HEADER)

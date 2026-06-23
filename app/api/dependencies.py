@@ -1,7 +1,16 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from fastapi import Header, HTTPException
+from fastapi import Header, HTTPException, Request
+
+from app.config import settings
+
+
+def get_use_mocks(request: Request) -> bool:
+    """Retorna True solo si USE_MOCKS=true en el env Y el header X-USE-MOCKS: true está presente."""
+    if not settings.USE_MOCKS:
+        return False
+    return request.headers.get("X-USE-MOCKS", "").lower() == "true"
 
 
 async def require_headers(

@@ -3,7 +3,7 @@ from datetime import date
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import require_headers
+from app.api.dependencies import get_use_mocks, require_headers
 from app.db.session import get_db
 from app.schemas.responses import (
     AverageTicketResponse,
@@ -35,8 +35,9 @@ async def get_sales_report(
     to: date | None = Query(None, description="Fecha de fin del período (YYYY-MM-DD)"),
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
+    use_mocks: bool = Depends(get_use_mocks),
 ):
-    return await analytics_service.get_sales_report(db, from_, to)
+    return await analytics_service.get_sales_report(db, from_, to, use_mocks=use_mocks)
 
 
 @router.get(
@@ -52,8 +53,9 @@ async def get_sales_report(
 async def get_orders_by_status(
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
+    use_mocks: bool = Depends(get_use_mocks),
 ):
-    return await analytics_service.get_orders_by_status(db)
+    return await analytics_service.get_orders_by_status(db, use_mocks=use_mocks)
 
 
 @router.get(
@@ -72,8 +74,9 @@ async def get_top_products(
     ),
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
+    use_mocks: bool = Depends(get_use_mocks),
 ):
-    return await analytics_service.get_top_products(db, page, pageSize)
+    return await analytics_service.get_top_products(db, page, pageSize, use_mocks=use_mocks)
 
 
 @router.get(
@@ -88,8 +91,9 @@ async def get_top_products(
 async def get_average_ticket(
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
+    use_mocks: bool = Depends(get_use_mocks),
 ):
-    return await analytics_service.get_average_ticket(db)
+    return await analytics_service.get_average_ticket(db, use_mocks=use_mocks)
 
 
 @router.get(
@@ -104,8 +108,9 @@ async def get_average_ticket(
 async def get_peak_hours(
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
+    use_mocks: bool = Depends(get_use_mocks),
 ):
-    return await analytics_service.get_peak_hours(db)
+    return await analytics_service.get_peak_hours(db, use_mocks=use_mocks)
 
 
 @router.get(
@@ -120,5 +125,6 @@ async def get_peak_hours(
 async def get_delivery_performance(
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
+    use_mocks: bool = Depends(get_use_mocks),
 ):
-    return await analytics_service.get_delivery_performance(db)
+    return await analytics_service.get_delivery_performance(db, use_mocks=use_mocks)
