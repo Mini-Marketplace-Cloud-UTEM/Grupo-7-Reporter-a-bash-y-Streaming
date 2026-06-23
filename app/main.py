@@ -96,7 +96,8 @@ curl -s -o /dev/null -w "%{http_code}" \\
   -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
   -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
   -H "X-Consumer: bff-grupo1" \\
-  -H "X-MOCK-HTTP-STATUS: 503"
+  -H "X-MOCK-HTTP-STATUS: 503"  \\
+  -H "X-USE-MOCKS: true"
 # Salida: 503
 ```
 
@@ -107,7 +108,8 @@ curl -s -o /dev/null -w "%{http_code}" \\
   -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
   -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
   -H "X-Consumer: bff-grupo1" \\
-  -H "X-MOCK-HTTP-STATUS: 429"
+  -H "X-MOCK-HTTP-STATUS: 429"  \\
+  -H "X-USE-MOCKS: true"
 # Salida: 429
 ```
 
@@ -118,7 +120,8 @@ curl -s -X POST https://grupo-7-reporter-a-bash-y-streaming-production.up.railwa
   -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
   -H "X-Consumer: bff-grupo1" \\
   -H "Idempotency-Key: 00000000-0000-0000-0000-000000000003" \\
-  -H "X-MOCK-HTTP-STATUS: 409"
+  -H "X-MOCK-HTTP-STATUS: 409" \\
+  -H "X-USE-MOCKS: true"
 # Simula un conflicto de idempotencia sin necesidad de duplicar la petición real
 ```
 
