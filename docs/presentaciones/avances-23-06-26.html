@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grupo 7 — Avances Reportería, Batch y Streaming</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3352;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --accent3: #ff6b6b;
+      --accent4: #ffd166;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --get: #22c55e;
+      --post: #f97316;
+      --badge-bg-get: rgba(34,197,94,.15);
+      --badge-bg-post: rgba(249,115,22,.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Slide wrapper ── */
+    .slides { width: 100%; }
+
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    section + section { border-top: 1px solid var(--border); }
+
+    /* ── Cover ── */
+    #cover {
+      background: radial-gradient(ellipse at 60% 40%, #1e1b4b 0%, #0f1117 70%);
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    #cover .tag {
+      font-size: .8rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.3);
+      padding: .35rem .9rem;
+      border-radius: 9999px;
+    }
+
+    #cover h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    #cover h1 span { color: var(--accent); }
+
+    #cover p.subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 640px;
+    }
+
+    #cover .meta {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: .5rem;
+    }
+
+    #cover .meta-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+    }
+
+    #cover .meta-item span:first-child {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    #cover .meta-item span:last-child {
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    /* ── Section title ── */
+    .section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header .eyebrow {
+      font-size: .75rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .5rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      margin-top: .5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Content wrapper ── */
+    .content { width: 100%; max-width: 960px; }
+
+    /* ── Architecture diagram ── */
+    #arquitectura { background: var(--bg); }
+
+    .arch-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .arch-node {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.4rem;
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .arch-node .icon { font-size: 1.8rem; }
+    .arch-node .label { font-size: .8rem; color: var(--muted); margin-top: .3rem; }
+    .arch-node .name { font-weight: 700; font-size: .95rem; margin-top: .1rem; }
+
+    .arch-arrow {
+      font-size: 1.5rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .arch-group {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      align-items: center;
+    }
+
+    .arch-group .arch-node { min-width: 140px; }
+
+    .arch-center {
+      background: linear-gradient(135deg, #1e1b4b, #1a1d27);
+      border-color: var(--accent);
+      box-shadow: 0 0 24px rgba(108,99,255,.25);
+    }
+
+    /* ── Endpoints grid ── */
+    #endpoints { background: var(--surface); }
+
+    .endpoint-list { display: flex; flex-direction: column; gap: 1.2rem; width: 100%; }
+
+    .endpoint-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: .6rem 1.2rem;
+      align-items: start;
+      transition: border-color .2s;
+    }
+
+    .endpoint-card:hover { border-color: var(--accent); }
+
+    .badge {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      padding: .3rem .7rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      align-self: center;
+    }
+
+    .badge-get  { background: var(--badge-bg-get);  color: var(--get);  border: 1px solid rgba(34,197,94,.3); }
+    .badge-post { background: var(--badge-bg-post); color: var(--post); border: 1px solid rgba(249,115,22,.3); }
+
+    .endpoint-path {
+      font-family: 'Courier New', monospace;
+      font-size: .92rem;
+      font-weight: 600;
+      color: var(--text);
+      align-self: center;
+    }
+
+    .endpoint-status {
+      font-size: .75rem;
+      color: var(--accent2);
+      background: rgba(0,212,170,.1);
+      border: 1px solid rgba(0,212,170,.25);
+      padding: .25rem .6rem;
+      border-radius: 6px;
+      align-self: center;
+      white-space: nowrap;
+    }
+
+    .endpoint-summary {
+      grid-column: 2 / span 2;
+      font-weight: 600;
+      font-size: .95rem;
+    }
+
+    .endpoint-desc {
+      grid-column: 1 / -1;
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .endpoint-tags {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-top: .2rem;
+    }
+
+    .tag-chip {
+      font-size: .72rem;
+      padding: .2rem .55rem;
+      border-radius: 6px;
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.25);
+      color: #a5b4fc;
+    }
+
+    /* ── Headers section ── */
+    #headers { background: var(--bg); }
+
+    .headers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .header-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .header-card .hname {
+      font-family: monospace;
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--accent4);
+      margin-bottom: .4rem;
+    }
+
+    .header-card .htype {
+      font-size: .72rem;
+      color: var(--accent);
+      background: rgba(108,99,255,.1);
+      border: 1px solid rgba(108,99,255,.2);
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: .5rem;
+    }
+
+    .header-card p {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── Mock section ── */
+    #mock { background: var(--surface); }
+
+    .mock-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (max-width: 700px) {
+      .mock-layout { grid-template-columns: 1fr; }
+      .arch-arrow { transform: rotate(90deg); }
+    }
+
+    .mock-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .mock-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.3rem 1.5rem;
+    }
+
+    .mock-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: .6rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .mock-card p, .mock-card li {
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .mock-card ul { padding-left: 1.2rem; }
+    .mock-card li { margin-top: .3rem; }
+
+    .mock-flow {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .8rem;
+    }
+
+    .mock-flow h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+    }
+
+    .flow-step {
+      display: flex;
+      align-items: flex-start;
+      gap: .8rem;
+    }
+
+    .flow-step .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(108,99,255,.2);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: .8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: .1rem;
+    }
+
+    .flow-step .text { font-size: .88rem; color: var(--muted); line-height: 1.5; }
+    .flow-step .text strong { color: var(--text); }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      font-family: 'Courier New', monospace;
+      font-size: .82rem;
+      color: #e2e8f0;
+      overflow-x: auto;
+      line-height: 1.6;
+    }
+
+    .code-block .cm { color: #6b7280; }
+    .code-block .ck { color: #a5b4fc; }
+    .code-block .cv { color: #fcd34d; }
+    .code-block .cs { color: #6ee7b7; }
+
+    /* ── Streaming section ── */
+    #streaming { background: var(--bg); }
+
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+
+    .event-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.3rem;
+      text-align: center;
+    }
+
+    .event-card .ev-icon { font-size: 2rem; margin-bottom: .6rem; }
+    .event-card .ev-name {
+      font-family: monospace;
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--accent2);
+      margin-bottom: .4rem;
+    }
+    .event-card .ev-sub { font-size: .78rem; color: var(--muted); }
+    .event-card .ev-action {
+      margin-top: .5rem;
+      font-size: .78rem;
+      color: var(--accent4);
+      background: rgba(255,209,102,.08);
+      border: 1px solid rgba(255,209,102,.2);
+      padding: .2rem .5rem;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .pubsub-banner {
+      background: linear-gradient(135deg, rgba(0,212,170,.08), rgba(108,99,255,.08));
+      border: 1px solid rgba(0,212,170,.2);
+      border-radius: 12px;
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      width: 100%;
+    }
+
+    .pubsub-banner .pb-icon { font-size: 2.2rem; }
+    .pubsub-banner p { font-size: .9rem; color: var(--muted); line-height: 1.6; }
+    .pubsub-banner strong { color: var(--text); }
+
+    /* ── Schemas section ── */
+    #schemas { background: var(--surface); }
+
+    .schema-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .schema-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .schema-card .sc-name {
+      font-family: monospace;
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: .8rem;
+      padding-bottom: .5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .schema-card .field {
+      display: flex;
+      justify-content: space-between;
+      font-size: .8rem;
+      padding: .25rem 0;
+    }
+
+    .schema-card .field-name { color: var(--text); font-family: monospace; }
+    .schema-card .field-type { color: var(--accent2); }
+
+    /* ── Status section ── */
+    #estado { background: var(--bg); }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .status-card .st-icon { font-size: 2rem; }
+    .status-card .st-label { font-size: .8rem; color: var(--muted); }
+    .status-card .st-val { font-size: 1.4rem; font-weight: 800; }
+    .status-card.done .st-val { color: var(--get); }
+    .status-card.wip .st-val { color: var(--accent4); }
+    .status-card.pending .st-val { color: var(--muted); }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: .4rem;
+    }
+
+    .progress-bar .fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* ── Footer slide ── */
+    #fin {
+      background: radial-gradient(ellipse at 40% 60%, #1e1b4b 0%, #0f1117 70%);
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    #fin h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; }
+    #fin h2 span { color: var(--accent2); }
+    #fin p { color: var(--muted); max-width: 520px; }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .8rem;
+    }
+
+    .pill {
+      padding: .45rem 1.1rem;
+      border-radius: 9999px;
+      font-size: .85rem;
+      font-weight: 600;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Nav dots ── */
+    .nav {
+      position: fixed;
+      right: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      z-index: 100;
+    }
+
+    .nav a {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 1.5px solid var(--muted);
+      display: block;
+      transition: all .2s;
+    }
+
+    .nav a:hover, .nav a.active { background: var(--accent); border-color: var(--accent); }
+
+    /* ── Util ── */
+    .divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 9999px;
+      margin: .8rem auto 0;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#cover" title="Portada"></a>
+  <a href="#arquitectura" title="Arquitectura"></a>
+  <a href="#endpoints" title="Endpoints"></a>
+  <a href="#headers" title="Headers"></a>
+  <a href="#mock" title="Mock"></a>
+  <a href="#streaming" title="Streaming"></a>
+  <a href="#schemas" title="Schemas"></a>
+  <a href="#estado" title="Estado"></a>
+  <a href="#fin" title="Cierre"></a>
+</nav>
+
+<div class="slides">
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 1 — PORTADA
+  ══════════════════════════════════════════ -->
+  <section id="cover">
+    <div class="tag">Mini Marketplace UTEM · Grupo 7</div>
+    <h1>Reportería, <span>Batch</span><br>y Streaming</h1>
+    <p class="subtitle">
+      API analítica que consolida eventos de los servicios upstream mediante
+      Google Cloud Pub/Sub y expone métricas agregadas para el BFF (Grupo 1).
+    </p>
+    <div class="meta">
+      <div class="meta-item">
+        <span>Stack</span>
+        <span>FastAPI · Python 3.14</span>
+      </div>
+      <div class="meta-item">
+        <span>Base de datos</span>
+        <span>Supabase (PostgreSQL)</span>
+      </div>
+      <div class="meta-item">
+        <span>Mensajería</span>
+        <span>Google Cloud Pub/Sub</span>
+      </div>
+      <div class="meta-item">
+        <span>Puerto</span>
+        <span>:8070</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 2 — ARQUITECTURA
+  ══════════════════════════════════════════ -->
+  <section id="arquitectura">
+    <div class="section-header">
+      <div class="eyebrow">Visión general</div>
+      <h2>Arquitectura del servicio</h2>
+      <div class="divider"></div>
+      <p>El servicio actúa como consumidor de eventos y expositor de reportes analíticos.</p>
+    </div>
+
+    <div class="arch-diagram">
+      <!-- Upstream services -->
+      <div class="arch-group">
+        <div class="arch-node"><div class="icon">🛒</div><div class="label">Grupo 2</div><div class="name">Pedidos</div></div>
+        <div class="arch-node"><div class="icon">💳</div><div class="label">Grupo 3</div><div class="name">Pagos</div></div>
+        <div class="arch-node"><div class="icon">📦</div><div class="label">Grupo 4</div><div class="name">Inventario</div></div>
+        <div class="arch-node"><div class="icon">🚚</div><div class="label">Grupo 5</div><div class="name">Despacho</div></div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <!-- Pub/Sub -->
+      <div class="arch-node" style="background:linear-gradient(135deg,rgba(0,212,170,.08),rgba(0,212,170,.02)); border-color:rgba(0,212,170,.35);">
+        <div class="icon">📨</div>
+        <div class="label">Google Cloud</div>
+        <div class="name" style="color:var(--accent2)">Pub/Sub</div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <!-- This service -->
+      <div class="arch-node arch-center">
+        <div class="icon">📊</div>
+        <div class="label">Grupo 7</div>
+        <div class="name" style="color:var(--accent)">Reportería</div>
+      </div>
+
+      <div class="arch-arrow">→</div>
+
+      <!-- Consumer -->
+      <div class="arch-node" style="border-color:rgba(255,209,102,.3);">
+        <div class="icon">🖥️</div>
+        <div class="label">Grupo 1</div>
+        <div class="name" style="color:var(--accent4)">BFF</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 3 — ENDPOINTS
+  ══════════════════════════════════════════ -->
+  <section id="endpoints">
+    <div class="section-header">
+      <div class="eyebrow">API REST</div>
+      <h2>Endpoints disponibles</h2>
+      <div class="divider"></div>
+      <p>Todos los endpoints están bajo el prefijo <code style="color:var(--accent)">/reports</code> y requieren headers de correlación.</p>
+    </div>
+
+    <div class="content">
+      <div class="endpoint-list">
+
+        <!-- GET /reports/sales -->
+        <div class="endpoint-card">
+          <span class="badge badge-get">GET</span>
+          <span class="endpoint-path">/reports/sales</span>
+          <span class="endpoint-status">200 OK</span>
+          <span class="endpoint-summary">Resumen financiero consolidado</span>
+          <p class="endpoint-desc">
+            Retorna el total de ventas y cantidad de pedidos para un período dado.
+            Acepta los query params <strong>from</strong> y <strong>to</strong> (YYYY-MM-DD) para filtrar
+            el rango temporal. Sin fechas, consolida todo el histórico disponible. La moneda siempre es CLP.
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">?from=YYYY-MM-DD</span>
+            <span class="tag-chip">?to=YYYY-MM-DD</span>
+            <span class="tag-chip">SalesReport</span>
+          </div>
+        </div>
+
+        <!-- GET /reports/orders-by-status -->
+        <div class="endpoint-card">
+          <span class="badge badge-get">GET</span>
+          <span class="endpoint-path">/reports/orders-by-status</span>
+          <span class="endpoint-status">200 OK</span>
+          <span class="endpoint-summary">Conteo de pedidos por estado</span>
+          <p class="endpoint-desc">
+            Retorna una lista con la cantidad de pedidos agrupados por estado
+            (ej: PENDING, CONFIRMED, DELIVERED). Los datos provienen del log de estados
+            registrado por el worker de Pub/Sub.
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">list[OrderStatusCount]</span>
+          </div>
+        </div>
+
+        <!-- GET /reports/top-products -->
+        <div class="endpoint-card">
+          <span class="badge badge-get">GET</span>
+          <span class="endpoint-path">/reports/top-products</span>
+          <span class="endpoint-status">200 OK</span>
+          <span class="endpoint-summary">Productos más vendidos</span>
+          <p class="endpoint-desc">
+            Lista paginada de productos ordenados por unidades vendidas de mayor a menor.
+            Soporta paginación mediante <strong>page</strong> (defecto: 1) y <strong>pageSize</strong>
+            (defecto: 20, máximo: 100).
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">?page=1</span>
+            <span class="tag-chip">?pageSize=20</span>
+            <span class="tag-chip">TopProductsResponse</span>
+          </div>
+        </div>
+
+        <!-- GET /reports/average-ticket -->
+        <div class="endpoint-card">
+          <span class="badge badge-get">GET</span>
+          <span class="endpoint-path">/reports/average-ticket</span>
+          <span class="endpoint-status">200 OK</span>
+          <span class="endpoint-summary">Ticket promedio de compra</span>
+          <p class="endpoint-desc">
+            Calcula el ticket promedio dividiendo el monto total de ventas entre la cantidad
+            de pedidos registrados. El valor se expresa en pesos chilenos (CLP).
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">AverageTicketResponse</span>
+          </div>
+        </div>
+
+        <!-- GET /reports/peak-hours -->
+        <div class="endpoint-card">
+          <span class="badge badge-get">GET</span>
+          <span class="endpoint-path">/reports/peak-hours</span>
+          <span class="endpoint-status">200 OK</span>
+          <span class="endpoint-summary">Franjas horarias con mayor volumen</span>
+          <p class="endpoint-desc">
+            Analiza la distribución horaria de pedidos agrupando por hora del día (0–23 h).
+            Útil para identificar los momentos de mayor demanda en el marketplace.
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">list[PeakHourItem]</span>
+          </div>
+        </div>
+
+        <!-- GET /reports/delivery-performance -->
+        <div class="endpoint-card">
+          <span class="badge badge-get">GET</span>
+          <span class="endpoint-path">/reports/delivery-performance</span>
+          <span class="endpoint-status">200 OK</span>
+          <span class="endpoint-summary">Tiempos promedio de entrega (Lead Time)</span>
+          <p class="endpoint-desc">
+            Consolida métricas de despacho: tiempo promedio de entrega en minutos
+            y cantidad total de envíos completados, calculados a partir de los eventos
+            <strong>ShipmentDelivered</strong> recibidos por Pub/Sub.
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">DeliveryPerformanceResponse</span>
+          </div>
+        </div>
+
+        <!-- POST /reports/batch/recalculate -->
+        <div class="endpoint-card">
+          <span class="badge badge-post">POST</span>
+          <span class="endpoint-path">/reports/batch/recalculate</span>
+          <span class="endpoint-status">202 Accepted</span>
+          <span class="endpoint-summary">Forzar recálculo batch (asíncrono)</span>
+          <p class="endpoint-desc">
+            Encola un recálculo completo de las agregaciones analíticas leyendo los logs crudos
+            almacenados en Supabase Storage. Retorna de inmediato con estado <strong>QUEUED</strong>;
+            el proceso corre en segundo plano. Requiere el header <strong>Idempotency-Key</strong>
+            para evitar ejecuciones duplicadas.
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">Body: {from?, to?}</span>
+            <span class="tag-chip">Idempotency-Key requerido</span>
+            <span class="tag-chip">BatchRecalculateResponse</span>
+          </div>
+        </div>
+
+        <!-- GET /health -->
+        <div class="endpoint-card">
+          <span class="badge badge-get">GET</span>
+          <span class="endpoint-path">/health</span>
+          <span class="endpoint-status">200 OK</span>
+          <span class="endpoint-summary">Health check del servicio</span>
+          <p class="endpoint-desc">
+            Endpoint de liveness probe. No requiere headers de autenticación.
+            Retorna <code>{"status": "ok"}</code> cuando el servicio está en línea.
+          </p>
+          <div class="endpoint-tags">
+            <span class="tag-chip">Sin autenticación</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 4 — HEADERS
+  ══════════════════════════════════════════ -->
+  <section id="headers">
+    <div class="section-header">
+      <div class="eyebrow">Contrato de headers</div>
+      <h2>Headers requeridos por endpoint</h2>
+      <div class="divider"></div>
+      <p>Todos los headers de tipo UUID son validados en el servidor. Una UUID inválida retorna 400.</p>
+    </div>
+
+    <div class="content">
+      <div class="headers-grid">
+
+        <div class="header-card">
+          <div class="hname">X-Request-Id</div>
+          <span class="htype">UUID · Obligatorio</span>
+          <p>Identificador único de la petición HTTP. Se retorna en la respuesta para trazabilidad extremo a extremo. Generado por el BFF (Grupo 1).</p>
+        </div>
+
+        <div class="header-card">
+          <div class="hname">X-Correlation-Id</div>
+          <span class="htype">UUID · Obligatorio</span>
+          <p>ID de correlación que atraviesa todos los servicios involucrados en un flujo de negocio. Permite trazar una operación a través de múltiples microservicios.</p>
+        </div>
+
+        <div class="header-card">
+          <div class="hname">X-Consumer</div>
+          <span class="htype">String · Obligatorio</span>
+          <p>Identificador del consumidor del API (ej: <code>bff-grupo1</code>). Permite al servicio identificar quién origina las peticiones para auditoría y rate limiting futuro.</p>
+        </div>
+
+        <div class="header-card" style="border-color:rgba(249,115,22,.3);">
+          <div class="hname" style="color:var(--post)">Idempotency-Key</div>
+          <span class="htype" style="color:var(--post); background:rgba(249,115,22,.1); border-color:rgba(249,115,22,.25)">UUID · Solo en POST /batch/recalculate</span>
+          <p>Garantiza que peticiones duplicadas con la misma clave no generen múltiples ejecuciones del proceso batch. Obligatorio únicamente para el endpoint de recálculo.</p>
+        </div>
+
+        <div class="header-card" style="border-color:rgba(108,99,255,.35);">
+          <div class="hname" style="color:var(--accent)">X-Mock-Http-Status</div>
+          <span class="htype">Integer 100–599 · Solo con USE_MOCKS=true</span>
+          <p>Header especial de pruebas. Cuando el servicio está en modo mock, este valor sobreescribe el código HTTP real de la respuesta. Permite simular errores sin condiciones reales de fallo.</p>
+        </div>
+
+        <div class="header-card" style="border-color:rgba(0,212,170,.3);">
+          <div class="hname" style="color:var(--accent2)">X-Request-Id</div>
+          <span class="htype" style="color:var(--accent2); background:rgba(0,212,170,.1); border-color:rgba(0,212,170,.25)">UUID · En respuesta</span>
+          <p>El servidor retorna el mismo <code>X-Request-Id</code> en cada respuesta via el middleware <code>inject_request_id</code>. Si no se envía, se genera un UUID automáticamente.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 5 — MOCK MIDDLEWARE
+  ══════════════════════════════════════════ -->
+  <section id="mock">
+    <div class="section-header">
+      <div class="eyebrow">Funcionalidad de desarrollo</div>
+      <h2>Mock Status Middleware</h2>
+      <div class="divider"></div>
+      <p>Permite simular cualquier código HTTP sin necesidad de provocar condiciones reales de fallo.</p>
+    </div>
+
+    <div class="content">
+      <div class="mock-layout">
+
+        <div class="mock-info">
+
+          <div class="mock-card">
+            <h3>🎛️ Activación</h3>
+            <p>Se activa con la variable de entorno <strong>USE_MOCKS=true</strong>. Por defecto está desactivado (<code>false</code>) para no afectar el comportamiento en producción.</p>
+          </div>
+
+          <div class="mock-card">
+            <h3>⚡ Comportamiento</h3>
+            <ul>
+              <li><strong>USE_MOCKS=false</strong> → Middleware es transparente (no-op).</li>
+              <li><strong>USE_MOCKS=true</strong> + header ausente → Respuesta pasa sin cambios.</li>
+              <li><strong>USE_MOCKS=true</strong> + header inválido → Se ignora con warning en logs.</li>
+              <li><strong>USE_MOCKS=true</strong> + entero 100–599 → Status code forzado.</li>
+            </ul>
+          </div>
+
+          <div class="mock-card">
+            <h3>🔒 Seguridad de Stack</h3>
+            <p>El middleware está registrado en posición LIFO junto a <code>inject_request_id</code>, garantizando que puede sobreescribir el status después de que toda la cadena procese la petición.</p>
+          </div>
+
+        </div>
+
+        <div class="mock-flow">
+          <h3>⚙️ Flujo de ejecución</h3>
+
+          <div class="flow-step">
+            <div class="num">1</div>
+            <div class="text">Cliente envía petición con header <strong>X-Mock-Http-Status: 503</strong></div>
+          </div>
+          <div class="flow-step">
+            <div class="num">2</div>
+            <div class="text">El middleware verifica si <strong>USE_MOCKS=true</strong> en settings</div>
+          </div>
+          <div class="flow-step">
+            <div class="num">3</div>
+            <div class="text">La petición pasa al handler real y se procesa normalmente (200 OK)</div>
+          </div>
+          <div class="flow-step">
+            <div class="num">4</div>
+            <div class="text">El middleware intercepta la respuesta y reemplaza el status_code por <strong>503</strong></div>
+          </div>
+          <div class="flow-step">
+            <div class="num">5</div>
+            <div class="text">El cliente recibe respuesta con el body real pero con status <strong>503 Service Unavailable</strong></div>
+          </div>
+
+          <div style="margin-top:.5rem">
+            <div class="code-block">
+<span class="cm"># Ejemplo de uso en desarrollo</span>
+curl -X GET http://localhost:8070/reports/sales \
+  -H <span class="cs">"X-Request-Id: f47ac10b-58cc-4372-a567-0e02b2c3d479"</span> \
+  -H <span class="cs">"X-Correlation-Id: 550e8400-e29b-41d4-a716-446655440000"</span> \
+  -H <span class="cs">"X-Consumer: bff-grupo1"</span> \
+  -H <span class="cv">"X-Mock-Http-Status: 503"</span>
+<span class="cm"># → Response body normal, pero HTTP 503</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 6 — STREAMING / PUB-SUB
+  ══════════════════════════════════════════ -->
+  <section id="streaming">
+    <div class="section-header">
+      <div class="eyebrow">Ingesta de datos</div>
+      <h2>Worker de Streaming (Pub/Sub)</h2>
+      <div class="divider"></div>
+      <p>Consume cuatro suscripciones en paralelo con reintentos exponenciales (máx. 5 intentos).</p>
+    </div>
+
+    <div class="content">
+      <div class="events-grid">
+
+        <div class="event-card">
+          <div class="ev-icon">🛒</div>
+          <div class="ev-name">OrderCreated</div>
+          <div class="ev-sub">PUBSUB_SUBSCRIPTION_ORDER_CREATED</div>
+          <div class="ev-action">Acumula ventas en fact_sales_summary</div>
+        </div>
+
+        <div class="event-card">
+          <div class="ev-icon">✅</div>
+          <div class="ev-name">PaymentApproved</div>
+          <div class="ev-sub">PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED</div>
+          <div class="ev-action">Registra en logs para trazabilidad</div>
+        </div>
+
+        <div class="event-card">
+          <div class="ev-icon">⚠️</div>
+          <div class="ev-name">InventoryShortage</div>
+          <div class="ev-sub">PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE</div>
+          <div class="ev-action">Alerta de quiebre de stock (warning)</div>
+        </div>
+
+        <div class="event-card">
+          <div class="ev-icon">🚚</div>
+          <div class="ev-name">ShipmentDelivered</div>
+          <div class="ev-sub">PUBSUB_SUBSCRIPTION_SHIPMENT_DELIVERED</div>
+          <div class="ev-action">Métricas de rendimiento de despacho</div>
+        </div>
+
+      </div>
+
+      <div class="pubsub-banner">
+        <div class="pb-icon">🔁</div>
+        <p>
+          Los consumidores se inician automáticamente al arrancar la aplicación via <strong>lifespan</strong> de FastAPI.
+          Usan un <strong>ThreadPoolExecutor</strong> con 4 workers para procesar mensajes concurrentemente.
+          Si el inicio de Pub/Sub falla, el servicio continúa operativo para las consultas REST.
+          Cada mensaje no procesado exitosamente recibe un <strong>nack()</strong> para que Pub/Sub lo reencole.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 7 — SCHEMAS DE RESPUESTA
+  ══════════════════════════════════════════ -->
+  <section id="schemas">
+    <div class="section-header">
+      <div class="eyebrow">Contrato de datos</div>
+      <h2>Schemas de respuesta</h2>
+      <div class="divider"></div>
+      <p>Todos los modelos están validados con Pydantic v2 y documentados en OpenAPI automáticamente.</p>
+    </div>
+
+    <div class="content">
+      <div class="schema-grid">
+
+        <div class="schema-card">
+          <div class="sc-name">SalesReport</div>
+          <div class="field"><span class="field-name">period</span><span class="field-type">SalesPeriod</span></div>
+          <div class="field"><span class="field-name">totalSales</span><span class="field-type">int (CLP)</span></div>
+          <div class="field"><span class="field-name">totalOrders</span><span class="field-type">int</span></div>
+          <div class="field"><span class="field-name">currency</span><span class="field-type">"CLP"</span></div>
+        </div>
+
+        <div class="schema-card">
+          <div class="sc-name">TopProductsResponse</div>
+          <div class="field"><span class="field-name">data[]</span><span class="field-type">TopProduct[]</span></div>
+          <div class="field"><span class="field-name">  productId</span><span class="field-type">str</span></div>
+          <div class="field"><span class="field-name">  unitsSold</span><span class="field-type">int</span></div>
+          <div class="field"><span class="field-name">  revenue</span><span class="field-type">int (CLP)</span></div>
+          <div class="field"><span class="field-name">pagination</span><span class="field-type">Pagination</span></div>
+        </div>
+
+        <div class="schema-card">
+          <div class="sc-name">BatchRecalculateResponse</div>
+          <div class="field"><span class="field-name">jobId</span><span class="field-type">UUID</span></div>
+          <div class="field"><span class="field-name">status</span><span class="field-type">"QUEUED"</span></div>
+        </div>
+
+        <div class="schema-card">
+          <div class="sc-name">AverageTicketResponse</div>
+          <div class="field"><span class="field-name">averageTicket</span><span class="field-type">int (CLP)</span></div>
+          <div class="field"><span class="field-name">currency</span><span class="field-type">"CLP"</span></div>
+        </div>
+
+        <div class="schema-card">
+          <div class="sc-name">DeliveryPerformanceResponse</div>
+          <div class="field"><span class="field-name">avgDeliveryTimeMinutes</span><span class="field-type">int</span></div>
+          <div class="field"><span class="field-name">totalDeliveredCount</span><span class="field-type">int</span></div>
+        </div>
+
+        <div class="schema-card">
+          <div class="sc-name">ErrorResponse (estándar)</div>
+          <div class="field"><span class="field-name">timestamp</span><span class="field-type">datetime ISO 8601</span></div>
+          <div class="field"><span class="field-name">status</span><span class="field-type">int</span></div>
+          <div class="field"><span class="field-name">code</span><span class="field-type">str</span></div>
+          <div class="field"><span class="field-name">message</span><span class="field-type">str</span></div>
+          <div class="field"><span class="field-name">correlationId</span><span class="field-type">UUID?</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 8 — ESTADO DEL PROYECTO
+  ══════════════════════════════════════════ -->
+  <section id="estado">
+    <div class="section-header">
+      <div class="eyebrow">Progreso</div>
+      <h2>Estado actual del proyecto</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="content">
+      <div class="status-grid">
+
+        <div class="status-card done">
+          <div class="st-icon">✅</div>
+          <div class="st-val">7 / 7</div>
+          <div class="st-label">Endpoints implementados</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🔒</div>
+          <div class="st-val">Activo</div>
+          <div class="st-label">Validación de headers</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🎭</div>
+          <div class="st-val">Listo</div>
+          <div class="st-label">Mock Status Middleware</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">📨</div>
+          <div class="st-val">4 eventos</div>
+          <div class="st-label">Suscripciones Pub/Sub</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🔁</div>
+          <div class="st-val">Listo</div>
+          <div class="st-label">Batch Recalculate</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🧹</div>
+          <div class="st-val">Ruff</div>
+          <div class="st-label">Linting configurado</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">⚙️</div>
+          <div class="st-val">Activo</div>
+          <div class="st-label">CI/CD (GitHub Actions)</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🐳</div>
+          <div class="st-val">Listo</div>
+          <div class="st-label">Docker + docker-compose</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 9 — CIERRE
+  ══════════════════════════════════════════ -->
+  <section id="fin">
+    <div class="tag">Mini Marketplace UTEM · Grupo 7</div>
+    <h2>API lista para<br><span>integración</span></h2>
+    <p>
+      Todos los endpoints están documentados en Swagger UI en
+      <code style="color:var(--accent)">/docs</code> y en ReDoc en
+      <code style="color:var(--accent)">/redoc</code>.
+      El servicio corre en el puerto <strong>8070</strong>.
+    </p>
+    <div class="pill-list">
+      <span class="pill">FastAPI 0.115+</span>
+      <span class="pill">Python 3.14</span>
+      <span class="pill">Supabase (PostgreSQL)</span>
+      <span class="pill">Google Cloud Pub/Sub</span>
+      <span class="pill">SQLAlchemy async</span>
+      <span class="pill">Pydantic v2</span>
+      <span class="pill">Ruff linting</span>
+      <span class="pill">Docker</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // Highlight active nav dot on scroll
+  const sections = document.querySelectorAll('section');
+  const dots = document.querySelectorAll('.nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        dots.forEach(d => d.classList.remove('active'));
+        const idx = Array.from(sections).indexOf(entry.target);
+        if (dots[idx]) dots[idx].classList.add('active');
+      }
+    });
+  }, { threshold: 0.5 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

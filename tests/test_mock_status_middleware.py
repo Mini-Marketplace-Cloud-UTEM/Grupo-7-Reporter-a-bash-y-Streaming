@@ -8,10 +8,11 @@ Cubre los cuatro escenarios posibles:
 4. USE_MOCKS=True + header inválido (no numérico / fuera de rango) → ignorado.
 """
 
+from unittest.mock import patch
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
-from unittest.mock import patch
 
 from app.main import app
 
@@ -25,6 +26,7 @@ async def client():
 
 # ── 1. USE_MOCKS desactivado ─────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_mocks_desactivado_no_altera_status(client):
     """Con USE_MOCKS=False el header X-MOCK-HTTP-STATUS es ignorado."""
@@ -35,6 +37,7 @@ async def test_mocks_desactivado_no_altera_status(client):
 
 
 # ── 2. USE_MOCKS activo, sin header ──────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_mocks_activo_sin_header_no_altera_status(client):
@@ -47,6 +50,7 @@ async def test_mocks_activo_sin_header_no_altera_status(client):
 
 # ── 3. USE_MOCKS activo, header válido ───────────────────────────────────────
 
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("forced_status", [400, 404, 503, 201, 500])
 async def test_mocks_activo_fuerza_status(client, forced_status):
@@ -58,6 +62,7 @@ async def test_mocks_activo_fuerza_status(client, forced_status):
 
 
 # ── 4. USE_MOCKS activo, header inválido ─────────────────────────────────────
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("bad_value", ["abc", "", "99", "600", "0"])

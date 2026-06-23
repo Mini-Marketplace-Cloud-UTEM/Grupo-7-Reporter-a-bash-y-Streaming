@@ -51,7 +51,11 @@ async def test_reporte_ventas_ok(client):
         "totalOrders": 5,
         "currency": "CLP",
     }
-    with patch("app.api.routes.reports.analytics_service.get_sales_report", new_callable=AsyncMock, return_value=mock_report):
+    with patch(
+        "app.api.routes.reports.analytics_service.get_sales_report",
+        new_callable=AsyncMock,
+        return_value=mock_report,
+    ):
         r = await client.get("/reports/sales", headers=HEADERS)
     assert r.status_code == 200
 

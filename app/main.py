@@ -1,7 +1,7 @@
 import logging
 import uuid
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -29,14 +29,124 @@ async def lifespan(app: FastAPI):
     logger.info("consumidores_pubsub_detenidos")
 
 
+_DESCRIPTION = """
+API de reportería analítica del Mini Marketplace.
+Consolida eventos de los servicios upstream (Pedidos, Pagos, Inventario, Despacho)
+mediante Google Cloud Pub/Sub y expone métricas agregadas para el BFF (Grupo 1).
+
+---
+
+## Headers obligatorios
+
+Todos los endpoints (excepto `GET /health`) requieren los siguientes headers:
+
+| Header | Tipo | Descripción |
+|---|---|---|
+| `X-Request-Id` | UUID | Identificador único de la petición |
+| `X-Correlation-Id` | UUID | Identificador de trazabilidad entre servicios |
+| `X-Consumer` | string | Identificador del consumidor que realiza la petición |
+| `Idempotency-Key` | UUID | **Solo en** `POST /reports/batch/recalculate` — previene ejecuciones duplicadas |
+
+---
+
+## Sistema de Mocks
+
+El servicio incluye un mecanismo de mocks de status HTTP diseñado para facilitar
+las pruebas de manejo de errores en el BFF (Grupo 1) **sin necesidad de provocar
+condiciones reales de fallo** en el backend.
+
+### Activación
+
+El sistema de mocks se controla mediante la variable de entorno `USE_MOCKS`:
+
+```
+# .env
+USE_MOCKS=true
+```
+
+Cuando `USE_MOCKS=false` (valor por defecto), el middleware es completamente
+transparente y no modifica ninguna respuesta.
+
+### Uso — header `X-MOCK-HTTP-STATUS`
+
+Con `USE_MOCKS=true`, incluye el header `X-MOCK-HTTP-STATUS` en cualquier
+petición con un código HTTP entero entre 100 y 599. El middleware reemplazará
+el status code real de la respuesta por el valor indicado.
+
+```
+X-MOCK-HTTP-STATUS: 503
+```
+
+### Tabla de comportamiento
+
+| `USE_MOCKS` | Header `X-MOCK-HTTP-STATUS` | Resultado |
+|---|---|---|
+| `false` | cualquier valor | Respuesta real sin modificaciones |
+| `true` | ausente | Respuesta real sin modificaciones |
+| `true` | valor no entero (ej. `"abc"`) | Respuesta real sin modificaciones (warning en log) |
+| `true` | entero fuera de rango (ej. `99`, `600`) | Respuesta real sin modificaciones (warning en log) |
+| `true` | entero válido 100–599 (ej. `503`) | Status code de la respuesta reemplazado por `503` |
+
+### Ejemplos con curl
+
+**Simular un 503 Service Unavailable en el reporte de ventas:**
+```bash
+curl -s -o /dev/null -w "%{http_code}" \\
+  http://localhost:8070/reports/sales \\
+  -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
+  -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
+  -H "X-Consumer: bff-grupo1" \\
+  -H "X-MOCK-HTTP-STATUS: 503"
+# Salida: 503
+```
+
+**Simular un 429 Too Many Requests en top-products:**
+```bash
+curl -s -o /dev/null -w "%{http_code}" \\
+  "http://localhost:8070/reports/top-products?page=1&pageSize=10" \\
+  -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
+  -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
+  -H "X-Consumer: bff-grupo1" \\
+  -H "X-MOCK-HTTP-STATUS: 429"
+# Salida: 429
+```
+
+**Simular un 202 en batch/recalculate (comportamiento real) para verificar idempotencia:**
+```bash
+curl -s -X POST http://localhost:8070/reports/batch/recalculate \\
+  -H "X-Request-Id: 00000000-0000-0000-0000-000000000001" \\
+  -H "X-Correlation-Id: 00000000-0000-0000-0000-000000000002" \\
+  -H "X-Consumer: bff-grupo1" \\
+  -H "Idempotency-Key: 00000000-0000-0000-0000-000000000003" \\
+  -H "X-MOCK-HTTP-STATUS: 409"
+# Simula un conflicto de idempotencia sin necesidad de duplicar la petición real
+```
+
+> **Nota:** El mock sobreescribe **únicamente el status code**. El cuerpo de la
+> respuesta corresponde siempre al procesamiento real del endpoint.
+"""
+
+_OPENAPI_TAGS = [
+    {
+        "name": "Reportes",
+        "description": (
+            "Endpoints de reportería analítica. Exponen métricas agregadas calculadas "
+            "a partir de los eventos recibidos por Pub/Sub. "
+            "Todos los endpoints de este tag admiten el header `X-MOCK-HTTP-STATUS` "
+            "cuando `USE_MOCKS=true` está activo en el servidor."
+        ),
+    },
+    {
+        "name": "Utilidades",
+        "description": "Endpoints de operación y monitoreo del servicio.",
+    },
+]
+
 app = FastAPI(
     title="Grupo 7 — Reportería, Batch y Streaming",
     version="1.0.0",
-    description=(
-        "API de reportería analítica del Mini Marketplace. "
-        "Consolida eventos de los servicios upstream (Pedidos, Pagos, Inventario, Despacho) "
-        "mediante Google Cloud Pub/Sub y expone métricas agregadas para el BFF (Grupo 1)."
-    ),
+    description=_DESCRIPTION,
+    openapi_tags=_OPENAPI_TAGS,
     lifespan=lifespan,
 )
 
@@ -63,7 +173,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "status": 500,
             "code": "INTERNAL_SERVER_ERROR",
             "message": "Ocurrió un error inesperado en el servidor",
@@ -76,6 +186,6 @@ app.include_router(reports.router)
 app.include_router(batch.router)
 
 
-@app.get("/health")
+@app.get("/health", tags=["Utilidades"], summary="Healthcheck del servicio")
 async def health():
     return {"status": "ok"}

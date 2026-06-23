@@ -1,4 +1,3 @@
-import asyncio
 import uuid
 from datetime import date
 
@@ -17,7 +16,9 @@ router = APIRouter(prefix="/reports", tags=["Reportes"])
 class BatchRecalculateRequest(BaseModel):
     """Parámetros opcionales de rango de fechas para acotar el recálculo batch."""
 
-    from_: date | None = Field(None, alias="from", description="Fecha de inicio del rango a recalcular (YYYY-MM-DD)")
+    from_: date | None = Field(
+        None, alias="from", description="Fecha de inicio del rango a recalcular (YYYY-MM-DD)"
+    )
     to: date | None = Field(None, description="Fecha de fin del rango a recalcular (YYYY-MM-DD)")
 
     model_config = {"populate_by_name": True}

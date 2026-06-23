@@ -6,10 +6,7 @@ de evento sean correctamente deserializados por los modelos Pydantic.
 """
 
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
-
-import pytest
+from datetime import UTC, datetime
 
 from app.schemas.events import EventEnvelope
 
@@ -20,7 +17,7 @@ def _construir_envelope(tipo_evento: str, payload: dict) -> dict:
         "eventId": str(uuid.uuid4()),
         "eventType": tipo_evento,
         "version": "1.0",
-        "occurredAt": datetime.now(timezone.utc).isoformat(),
+        "occurredAt": datetime.now(UTC).isoformat(),
         "producer": "test",
         "correlationId": str(uuid.uuid4()),
         "payload": payload,
@@ -31,7 +28,7 @@ def test_parseo_order_created():
     """El envelope de OrderCreated debe deserializarse con el tipo y orderId correctos."""
     raw = _construir_envelope(
         "OrderCreated",
-        {"orderId": "ORD-001", "totalAmount": "49990", "createdAt": datetime.now(timezone.utc).isoformat()},
+        {"orderId": "ORD-001", "totalAmount": "49990", "createdAt": datetime.now(UTC).isoformat()},
     )
     envelope = EventEnvelope(**raw)
     assert envelope.eventType == "OrderCreated"
@@ -40,14 +37,18 @@ def test_parseo_order_created():
 
 def test_parseo_payment_approved():
     """El envelope de PaymentApproved debe deserializarse correctamente."""
-    raw = _construir_envelope("PaymentApproved", {"paymentId": "PAY-001", "orderId": "ORD-001", "amountPaid": "49990"})
+    raw = _construir_envelope(
+        "PaymentApproved", {"paymentId": "PAY-001", "orderId": "ORD-001", "amountPaid": "49990"}
+    )
     envelope = EventEnvelope(**raw)
     assert envelope.eventType == "PaymentApproved"
 
 
 def test_parseo_inventory_shortage():
     """El envelope de InventoryShortage debe deserializarse correctamente."""
-    raw = _construir_envelope("InventoryShortage", {"productId": "P-100", "currentStock": 2, "requestedQuantity": 5})
+    raw = _construir_envelope(
+        "InventoryShortage", {"productId": "P-100", "currentStock": 2, "requestedQuantity": 5}
+    )
     envelope = EventEnvelope(**raw)
     assert envelope.eventType == "InventoryShortage"
 
@@ -59,7 +60,7 @@ def test_parseo_shipment_delivered():
         {
             "shipment_id": "SHP-001",
             "order_id": "ORD-001",
-            "delivered_at": datetime.now(timezone.utc).isoformat(),
+            "delivered_at": datetime.now(UTC).isoformat(),
             "city": "Santiago",
         },
     )

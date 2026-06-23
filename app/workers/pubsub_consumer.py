@@ -24,7 +24,7 @@ from app.schemas.events import (
     PaymentApprovedPayload,
     ShipmentDeliveredPayload,
 )
-from app.services.analytics_service import upsert_sales_from_order, upsert_top_product
+from app.services.analytics_service import upsert_sales_from_order
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,9 @@ async def _handle_order_created(payload: dict, correlation_id: str) -> None:
     """Acumula las ventas del pedido en fact_sales_summary (modo REAL_TIME)."""
     data = OrderCreatedPayload(**payload)
     async with AsyncSessionLocal() as db:
-        await upsert_sales_from_order(db, data.createdAt, Decimal(str(data.totalAmount)), correlation_id)
+        await upsert_sales_from_order(
+            db, data.createdAt, Decimal(str(data.totalAmount)), correlation_id
+        )
     logger.info("evento_order_created orderId=%s correlationId=%s", data.orderId, correlation_id)
 
 
@@ -44,7 +46,12 @@ async def _handle_order_created(payload: dict, correlation_id: str) -> None:
 async def _handle_payment_approved(payload: dict, correlation_id: str) -> None:
     """Registra la aprobación del pago. Por ahora solo se loguea para trazabilidad."""
     data = PaymentApprovedPayload(**payload)
-    logger.info("evento_payment_approved paymentId=%s orderId=%s correlationId=%s", data.paymentId, data.orderId, correlation_id)
+    logger.info(
+        "evento_payment_approved paymentId=%s orderId=%s correlationId=%s",
+        data.paymentId,
+        data.orderId,
+        correlation_id,
+    )
 
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
@@ -53,7 +60,10 @@ async def _handle_inventory_shortage(payload: dict, correlation_id: str) -> None
     data = InventoryShortagePayload(**payload)
     logger.warning(
         "evento_inventory_shortage productId=%s stockActual=%d solicitado=%d correlationId=%s",
-        data.productId, data.currentStock, data.requestedQuantity, correlation_id,
+        data.productId,
+        data.currentStock,
+        data.requestedQuantity,
+        correlation_id,
     )
 
 
@@ -63,7 +73,10 @@ async def _handle_shipment_delivered(payload: dict, correlation_id: str) -> None
     data = ShipmentDeliveredPayload(**payload)
     logger.info(
         "evento_shipment_delivered envioId=%s pedidoId=%s ciudad=%s correlationId=%s",
-        data.shipment_id, data.order_id, data.city, correlation_id,
+        data.shipment_id,
+        data.order_id,
+        data.city,
+        correlation_id,
     )
 
 
@@ -83,6 +96,7 @@ def _make_callback(loop: asyncio.AbstractEventLoop):
     El cliente de Pub/Sub opera en un hilo separado, por lo que se usa
     run_coroutine_threadsafe para despachar al event loop principal de asyncio.
     """
+
     def callback(message: pubsub_v1.subscriber.message.Message) -> None:
         try:
             raw = json.loads(message.data.decode("utf-8"))

@@ -1,0 +1,123 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# CI — Grupo 7 Reportería, Batch y Streaming
+#
+# Ejecuta lint (ruff) y el suite de pruebas (pytest + pytest-asyncio) en cada
+# push y pull-request contra las ramas principales.
+#
+# Secrets requeridos: ninguno (las dependencias externas se mockean en tests)
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Lint ────────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar ruff
+        run: pip install -r requirements-dev.txt
+
+      - name: Ejecutar ruff check
+        run: ruff check .
+
+      - name: Verificar formato con ruff format
+        run: ruff format --check .
+
+  # ── Tests ───────────────────────────────────────────────────────────────────
+  test:
+    name: Pruebas (pytest)
+    runs-on: ubuntu-latest
+    needs: lint
+
+    env:
+      # Variables con valores dummy para que pydantic-settings no falle al
+      # importar app.config.  Las dependencias reales (Supabase, PubSub)
+      # estan mockeadas en todos los tests.
+      APP_ENV: test
+      SUPABASE_URL: "https://placeholder.supabase.co"
+      SUPABASE_ANON_KEY: "placeholder"
+      DATABASE_URL: "postgresql+asyncpg://user:pass@localhost:5432/db"
+      GOOGLE_CLOUD_PROJECT: "placeholder-project"
+      PUBSUB_SUBSCRIPTION_ORDER_CREATED: "projects/placeholder-project/subscriptions/order-created-sub"
+      PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED: "projects/placeholder-project/subscriptions/payment-approved-sub"
+      PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE: "projects/placeholder-project/subscriptions/inventory-shortage-sub"
+      PUBSUB_SUBSCRIPTION_SHIPMENT_DELIVERED: "projects/placeholder-project/subscriptions/shipment-delivered-sub"
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Instalar pytest-cov
+        run: pip install pytest-cov
+
+      - name: Ejecutar pruebas con cobertura
+        run: |
+          pytest tests/ \
+            --tb=short \
+            --asyncio-mode=auto \
+            -v \
+            --junitxml=reports/junit.xml \
+            --cov=app \
+            --cov-report=term-missing \
+            --cov-report=xml:reports/coverage.xml
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Subir reporte JUnit
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: junit-report
+          path: reports/junit.xml
+          retention-days: 14
+
+      - name: Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: reports/coverage.xml
+          retention-days: 14
+
+      - name: Publicar resumen de cobertura en el PR
+        uses: orgoro/coverage@v3.2
+        if: github.event_name == 'pull_request'
+        with:
+          coverageFile: reports/coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          thresholdAll: 0.60
+          thresholdNew: 0.70
+          thresholdModified: 0.70

@@ -19,7 +19,9 @@ class EventEnvelope(BaseModel):
     eventId: str = Field(..., description="Identificador único del evento")
     eventType: str = Field(..., description="Tipo de evento (ej: OrderCreated)")
     version: str = Field("1.0", description="Versión del esquema del evento")
-    occurredAt: datetime = Field(..., description="Marca temporal de cuando ocurrió el evento (ISO 8601)")
+    occurredAt: datetime = Field(
+        ..., description="Marca temporal de cuando ocurrió el evento (ISO 8601)"
+    )
     producer: str = Field(..., description="Servicio que originó el evento")
     correlationId: UUID = Field(..., description="ID de correlación para trazabilidad distribuida")
     payload: dict[str, Any] = Field(..., description="Cuerpo específico del evento según su tipo")

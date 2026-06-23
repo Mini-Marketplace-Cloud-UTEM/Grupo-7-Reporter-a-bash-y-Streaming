@@ -10,21 +10,23 @@ Al finalizar, los registros del rango procesado quedan marcados como BATCH_RECAL
 
 import json
 import logging
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from supabase import create_client
 from sqlalchemy.ext.asyncio import AsyncSession
+from supabase import create_client
 
 from app.config import settings
-from app.models.analytics import AggTopProduct, FactSalesSummary
-from app.services.analytics_service import upsert_sales_from_order, upsert_top_product
+from app.models.analytics import FactSalesSummary
+from app.services.analytics_service import upsert_sales_from_order
 
 logger = logging.getLogger(__name__)
 
 
-async def run_batch_recalculate(db: AsyncSession, from_date: date | None, to_date: date | None, job_id: UUID) -> None:
+async def run_batch_recalculate(
+    db: AsyncSession, from_date: date | None, to_date: date | None, job_id: UUID
+) -> None:
     """
     Ejecuta el recálculo completo de agregaciones para el rango de fechas indicado.
 
@@ -56,9 +58,13 @@ async def run_batch_recalculate(db: AsyncSession, from_date: date | None, to_dat
 
                 occurred_at_raw = event.get("occurredAt")
                 try:
-                    occurred_at = datetime.fromisoformat(occurred_at_raw) if occurred_at_raw else datetime.now(timezone.utc)
+                    occurred_at = (
+                        datetime.fromisoformat(occurred_at_raw)
+                        if occurred_at_raw
+                        else datetime.now(UTC)
+                    )
                 except ValueError:
-                    occurred_at = datetime.now(timezone.utc)
+                    occurred_at = datetime.now(UTC)
 
                 # Filtrar por rango de fechas si fue especificado en la solicitud
                 if from_date and occurred_at.date() < from_date:
@@ -76,11 +82,11 @@ async def run_batch_recalculate(db: AsyncSession, from_date: date | None, to_dat
                     pass
 
         # Marcar todos los registros del rango como recalculados por proceso batch
-        from sqlalchemy import update, func as sa_func
+        from sqlalchemy import func as sa_func
+        from sqlalchemy import update
 
-        stmt = (
-            update(FactSalesSummary)
-            .values(aggregation_type="BATCH_RECALCULATED", updated_at=datetime.now(timezone.utc))
+        stmt = update(FactSalesSummary).values(
+            aggregation_type="BATCH_RECALCULATED", updated_at=datetime.now(UTC)
         )
         if from_date:
             stmt = stmt.where(

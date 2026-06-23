@@ -29,7 +29,9 @@ router = APIRouter(prefix="/reports", tags=["Reportes"])
     ),
 )
 async def get_sales_report(
-    from_: date | None = Query(None, alias="from", description="Fecha de inicio del período (YYYY-MM-DD)"),
+    from_: date | None = Query(
+        None, alias="from", description="Fecha de inicio del período (YYYY-MM-DD)"
+    ),
     to: date | None = Query(None, description="Fecha de fin del período (YYYY-MM-DD)"),
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
@@ -65,7 +67,9 @@ async def get_orders_by_status(
 )
 async def get_top_products(
     page: int = Query(1, ge=1, description="Número de página (comienza en 1)"),
-    pageSize: int = Query(20, ge=1, le=100, description="Cantidad de productos por página (máximo 100)"),
+    pageSize: int = Query(
+        20, ge=1, le=100, description="Cantidad de productos por página (máximo 100)"
+    ),
     _headers: dict = Depends(require_headers),
     db: AsyncSession = Depends(get_db),
 ):

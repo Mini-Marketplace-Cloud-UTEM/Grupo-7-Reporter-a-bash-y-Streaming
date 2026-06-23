@@ -6,9 +6,9 @@ Tablas:
     agg_top_products    — Ranking acumulado de productos por unidades vendidas
 """
 
+import uuid
 from datetime import datetime
 from decimal import Decimal
-import uuid
 
 from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
