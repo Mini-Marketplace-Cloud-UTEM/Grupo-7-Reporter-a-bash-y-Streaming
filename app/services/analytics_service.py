@@ -6,7 +6,7 @@ funciones de upsert que el worker de Pub/Sub utiliza para actualizar
 las métricas en tiempo real.
 """
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 from sqlalchemy import func, select, text
@@ -17,8 +17,8 @@ from app.schemas.responses import (
     AverageTicketResponse,
     DeliveryPerformanceResponse,
     OrderStatusCount,
-    PeakHourItem,
     Pagination,
+    PeakHourItem,
     SalesPeriod,
     SalesReport,
     TopProduct,
@@ -37,9 +37,14 @@ async def get_sales_report(
         func.sum(FactSalesSummary.total_orders_count),
     )
     if from_date:
-        stmt = stmt.where(FactSalesSummary.period_date >= datetime(from_date.year, from_date.month, from_date.day))
+        stmt = stmt.where(
+            FactSalesSummary.period_date >= datetime(from_date.year, from_date.month, from_date.day)
+        )
     if to_date:
-        stmt = stmt.where(FactSalesSummary.period_date <= datetime(to_date.year, to_date.month, to_date.day, 23, 59, 59))
+        stmt = stmt.where(
+            FactSalesSummary.period_date
+            <= datetime(to_date.year, to_date.month, to_date.day, 23, 59, 59)
+        )
 
     result = await db.execute(stmt)
     row = result.one()
@@ -47,7 +52,12 @@ async def get_sales_report(
     total_orders = int(row[1] or 0)
 
     return SalesReport(
-        period=SalesPeriod(**{"from": str(from_date) if from_date else None, "to": str(to_date) if to_date else None}),
+        period=SalesPeriod(
+            **{
+                "from": str(from_date) if from_date else None,
+                "to": str(to_date) if to_date else None,
+            }
+        ),
         totalSales=total_sales,
         totalOrders=total_orders,
         currency="CLP",
@@ -61,7 +71,9 @@ async def get_orders_by_status(db: AsyncSession) -> list[OrderStatusCount]:
     Los datos provienen de order_status_log, tabla auxiliar poblada
     por el worker al procesar eventos OrderCreated y actualizaciones de estado.
     """
-    raw = await db.execute(text("SELECT status, COUNT(*) as count FROM order_status_log GROUP BY status"))
+    raw = await db.execute(
+        text("SELECT status, COUNT(*) as count FROM order_status_log GROUP BY status")
+    )
     rows = raw.fetchall()
     if not rows:
         return []
@@ -138,18 +150,19 @@ async def get_delivery_performance(db: AsyncSession) -> DeliveryPerformanceRespo
     por el worker al procesar eventos ShipmentDelivered.
     """
     raw = await db.execute(
-        text(
-            "SELECT AVG(delivery_time_minutes)::int, COUNT(*)::int "
-            "FROM shipment_delivery_log"
-        )
+        text("SELECT AVG(delivery_time_minutes)::int, COUNT(*)::int " "FROM shipment_delivery_log")
     )
     row = raw.fetchone()
     avg_time = int(row[0] or 0) if row else 0
     total_count = int(row[1] or 0) if row else 0
-    return DeliveryPerformanceResponse(avgDeliveryTimeMinutes=avg_time, totalDeliveredCount=total_count)
+    return DeliveryPerformanceResponse(
+        avgDeliveryTimeMinutes=avg_time, totalDeliveredCount=total_count
+    )
 
 
-async def upsert_sales_from_order(db: AsyncSession, period_date: datetime, amount: Decimal, correlation_id: str) -> None:
+async def upsert_sales_from_order(
+    db: AsyncSession, period_date: datetime, amount: Decimal, correlation_id: str
+) -> None:
     """
     Acumula ventas del día en fact_sales_summary (modo REAL_TIME).
 
@@ -158,7 +171,8 @@ async def upsert_sales_from_order(db: AsyncSession, period_date: datetime, amoun
     """
     existing = await db.execute(
         select(FactSalesSummary).where(
-            func.date_trunc("day", FactSalesSummary.period_date) == func.date_trunc("day", period_date)
+            func.date_trunc("day", FactSalesSummary.period_date)
+            == func.date_trunc("day", period_date)
         )
     )
     record = existing.scalar_one_or_none()
@@ -166,7 +180,7 @@ async def upsert_sales_from_order(db: AsyncSession, period_date: datetime, amoun
         record.total_sales_amount += amount
         record.total_orders_count += 1
         record.aggregation_type = "REAL_TIME"
-        record.updated_at = datetime.now(timezone.utc)
+        record.updated_at = datetime.now(UTC)
     else:
         db.add(
             FactSalesSummary(
@@ -179,14 +193,20 @@ async def upsert_sales_from_order(db: AsyncSession, period_date: datetime, amoun
     await db.commit()
 
 
-async def upsert_top_product(db: AsyncSession, product_id: str, units: int, revenue: Decimal) -> None:
+async def upsert_top_product(
+    db: AsyncSession, product_id: str, units: int, revenue: Decimal
+) -> None:
     """Acumula unidades vendidas e ingresos por producto en agg_top_products."""
     existing = await db.execute(select(AggTopProduct).where(AggTopProduct.product_id == product_id))
     record = existing.scalar_one_or_none()
     if record:
         record.total_units_sold += units
         record.total_revenue_generated += revenue
-        record.last_calculated_at = datetime.now(timezone.utc)
+        record.last_calculated_at = datetime.now(UTC)
     else:
-        db.add(AggTopProduct(product_id=product_id, total_units_sold=units, total_revenue_generated=revenue))
+        db.add(
+            AggTopProduct(
+                product_id=product_id, total_units_sold=units, total_revenue_generated=revenue
+            )
+        )
     await db.commit()

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from fastapi import Header, HTTPException
@@ -13,18 +13,22 @@ async def require_headers(
     for name, value in [("X-Request-Id", x_request_id), ("X-Correlation-Id", x_correlation_id)]:
         try:
             UUID(value)
-        except ValueError:
+        except ValueError as err:
             raise HTTPException(
                 status_code=400,
                 detail={
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "status": 400,
                     "code": "INVALID_HEADER",
                     "message": f"El header {name} debe ser un UUID válido",
                     "correlationId": None,
                 },
-            )
-    return {"x_request_id": x_request_id, "x_correlation_id": x_correlation_id, "x_consumer": x_consumer}
+            ) from err
+    return {
+        "x_request_id": x_request_id,
+        "x_correlation_id": x_correlation_id,
+        "x_consumer": x_consumer,
+    }
 
 
 async def require_headers_with_idempotency(
@@ -41,17 +45,17 @@ async def require_headers_with_idempotency(
     ]:
         try:
             UUID(value)
-        except ValueError:
+        except ValueError as err:
             raise HTTPException(
                 status_code=400,
                 detail={
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                     "status": 400,
                     "code": "INVALID_HEADER",
                     "message": f"El header {name} debe ser un UUID válido",
                     "correlationId": None,
                 },
-            )
+            ) from err
     return {
         "x_request_id": x_request_id,
         "x_correlation_id": x_correlation_id,

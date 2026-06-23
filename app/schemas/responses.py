@@ -18,13 +18,17 @@ class ErrorResponse(BaseModel):
     status: int = Field(..., description="Código HTTP de la respuesta")
     code: str = Field(..., description="Código interno del error (ej: INVALID_REQUEST)")
     message: str = Field(..., description="Descripción legible del error")
-    correlationId: UUID | None = Field(None, description="ID de correlación del request que causó el error")
+    correlationId: UUID | None = Field(
+        None, description="ID de correlación del request que causó el error"
+    )
 
 
 class SalesPeriod(BaseModel):
     """Rango de fechas del período reportado."""
 
-    from_: str | None = Field(None, alias="from", description="Fecha de inicio del período (YYYY-MM-DD)")
+    from_: str | None = Field(
+        None, alias="from", description="Fecha de inicio del período (YYYY-MM-DD)"
+    )
     to: str | None = Field(None, description="Fecha de fin del período (YYYY-MM-DD)")
 
     model_config = {"populate_by_name": True}
@@ -75,7 +79,9 @@ class BatchRecalculateResponse(BaseModel):
     """Confirmación de encolado del proceso de recálculo batch."""
 
     jobId: UUID = Field(..., description="Identificador único del trabajo de recálculo")
-    status: str = Field("QUEUED", description="Estado inicial del trabajo (siempre QUEUED al crear)")
+    status: str = Field(
+        "QUEUED", description="Estado inicial del trabajo (siempre QUEUED al crear)"
+    )
 
 
 class AverageTicketResponse(BaseModel):
@@ -89,11 +95,15 @@ class PeakHourItem(BaseModel):
     """Volumen de pedidos para una hora específica del día."""
 
     hour: int = Field(..., description="Hora del día en formato 24h (0–23)", example=18)
-    orderCount: int = Field(..., description="Cantidad de pedidos registrados en esa hora", example=42)
+    orderCount: int = Field(
+        ..., description="Cantidad de pedidos registrados en esa hora", example=42
+    )
 
 
 class DeliveryPerformanceResponse(BaseModel):
     """Métricas consolidadas de rendimiento del servicio de despacho."""
 
-    avgDeliveryTimeMinutes: int = Field(..., description="Tiempo promedio de entrega en minutos", example=120)
+    avgDeliveryTimeMinutes: int = Field(
+        ..., description="Tiempo promedio de entrega en minutos", example=120
+    )
     totalDeliveredCount: int = Field(..., description="Total de envíos completados", example=154)
