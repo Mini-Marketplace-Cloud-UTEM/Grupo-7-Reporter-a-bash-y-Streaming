@@ -10,3 +10,4 @@ build/
 .mypy_cache/
 *.log
 .coverage
+**/.DS_Store
