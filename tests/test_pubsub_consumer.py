@@ -19,6 +19,7 @@ from app.workers.pubsub_consumer import (
     _handle_payment_approved,
     _handle_shipment_delivered,
     _make_callback,
+    start_consumers,
     stop_consumers,
 )
 
@@ -331,3 +332,28 @@ async def test_stop_consumers_un_future():
     future = MagicMock()
     await stop_consumers([future])
     future.cancel.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# start_consumers con suscripciones vacías
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_start_consumers_suscripciones_vacias_retorna_lista_vacia():
+    """Con todas las suscripciones configuradas como cadena vacía debe retornar lista vacía."""
+    mock_subscriber = MagicMock()
+
+    with (
+        patch("app.workers.pubsub_consumer.pubsub_v1.SubscriberClient", return_value=mock_subscriber),
+        patch("app.workers.pubsub_consumer.settings") as mock_settings,
+    ):
+        mock_settings.PUBSUB_SUBSCRIPTION_ORDER_CREATED = ""
+        mock_settings.PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED = ""
+        mock_settings.PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE = ""
+        mock_settings.PUBSUB_SUBSCRIPTION_SHIPMENT_DELIVERED = ""
+
+        futures = await start_consumers()
+
+    assert futures == []
+    mock_subscriber.subscribe.assert_not_called()
