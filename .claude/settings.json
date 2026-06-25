@@ -1,5 +1,18 @@
 {
   "worktree": {
     "bgIsolation": "none"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -q 'git commit' && printf '\\n💡 Sugerencia: ejecuta /lint-fix para verificar y corregir el estilo antes del próximo push.\\n' || true"
+          }
+        ]
+      }
+    ]
   }
 }
