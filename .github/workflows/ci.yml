@@ -53,7 +53,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
 
+    permissions:
+      pull-requests: write
+
     env:
+      # orgoro/coverage@v3.2 usa Node 20; permitir hasta que el action actualice su runtime
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
       # Variables con valores dummy para que pydantic-settings no falle al
       # importar app.config.  Las dependencias reales (Supabase, PubSub)
       # estan mockeadas en todos los tests.
