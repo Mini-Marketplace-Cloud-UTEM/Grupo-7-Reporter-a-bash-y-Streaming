@@ -8,8 +8,6 @@ esperados sin depender de base de datos ni servicios externos.
 import math
 from datetime import date
 
-import pytest
-
 from app.services.mock_data import (
     average_ticket,
     delivery_performance,
@@ -18,7 +16,6 @@ from app.services.mock_data import (
     sales_report,
     top_products,
 )
-
 
 # ---------------------------------------------------------------------------
 # sales_report

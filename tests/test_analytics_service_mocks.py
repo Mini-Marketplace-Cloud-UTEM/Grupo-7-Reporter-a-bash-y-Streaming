@@ -5,7 +5,6 @@ Verifica que cuando use_mocks=True cada función delegue a mock_data
 sin tocar la base de datos (db.execute no debe ser llamado).
 """
 
-from datetime import date
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -35,7 +34,7 @@ def mock_db():
 @pytest.mark.asyncio
 async def test_get_sales_report_usa_mock_data(mock_db):
     """Con use_mocks=True debe delegar a mock_data.sales_report sin consultar la BD."""
-    from app.schemas.responses import SalesReport, SalesPeriod
+    from app.schemas.responses import SalesPeriod, SalesReport
 
     valor_mock = SalesReport(
         period=SalesPeriod(**{"from": None, "to": None}),

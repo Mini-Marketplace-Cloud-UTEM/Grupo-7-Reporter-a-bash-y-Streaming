@@ -7,8 +7,6 @@ y el header X-USE-MOCKS enviado en el request.
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from app.api.dependencies import get_use_mocks
 
 

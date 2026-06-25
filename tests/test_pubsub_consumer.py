@@ -345,7 +345,9 @@ async def test_start_consumers_suscripciones_vacias_retorna_lista_vacia():
     mock_subscriber = MagicMock()
 
     with (
-        patch("app.workers.pubsub_consumer.pubsub_v1.SubscriberClient", return_value=mock_subscriber),
+        patch(
+            "app.workers.pubsub_consumer.pubsub_v1.SubscriberClient", return_value=mock_subscriber
+        ),
         patch("app.workers.pubsub_consumer.settings") as mock_settings,
     ):
         mock_settings.PUBSUB_SUBSCRIPTION_ORDER_CREATED = ""

@@ -283,9 +283,7 @@ async def test_reporte_ventas_con_fechas_ok(client):
         new_callable=AsyncMock,
         return_value=mock_report,
     ):
-        r = await client.get(
-            "/reports/sales?from=2024-01-01&to=2024-01-31", headers=HEADERS
-        )
+        r = await client.get("/reports/sales?from=2024-01-01&to=2024-01-31", headers=HEADERS)
     assert r.status_code == 200
 
 
