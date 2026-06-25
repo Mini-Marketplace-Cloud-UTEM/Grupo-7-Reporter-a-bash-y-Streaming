@@ -12,7 +12,13 @@ from decimal import Decimal
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.analytics import AggTopProduct, FactSalesSummary
+from app.models.analytics import (
+    AggTopProduct,
+    FactSalesSummary,
+    InventoryShortageLog,
+    OrderStatusLog,
+    ShipmentDeliveryLog,
+)
 from app.schemas.responses import (
     AverageTicketResponse,
     DeliveryPerformanceResponse,
@@ -200,7 +206,8 @@ async def upsert_sales_from_order(
         record.total_sales_amount += amount
         record.total_orders_count += 1
         record.aggregation_type = "REAL_TIME"
-        record.updated_at = datetime.now(UTC)
+        # naive (sin tzinfo) para calzar con la columna TIMESTAMP WITHOUT TIME ZONE
+        record.updated_at = datetime.now(UTC).replace(tzinfo=None)
     else:
         db.add(
             FactSalesSummary(
@@ -222,11 +229,76 @@ async def upsert_top_product(
     if record:
         record.total_units_sold += units
         record.total_revenue_generated += revenue
-        record.last_calculated_at = datetime.now(UTC)
+        record.last_calculated_at = datetime.now(UTC).replace(tzinfo=None)
     else:
         db.add(
             AggTopProduct(
                 product_id=product_id, total_units_sold=units, total_revenue_generated=revenue
             )
         )
+    await db.commit()
+
+
+async def insert_shipment_delivery(
+    db: AsyncSession,
+    shipment_id: str,
+    order_id: str,
+    delivered_at: datetime,
+    city: str | None,
+    delivery_time_minutes: int | None = None,
+) -> None:
+    """
+    Guarda un envío entregado en shipment_delivery_log (modelo ORM ShipmentDeliveryLog).
+
+    shipment_id es UNIQUE, así que antes de insertar verificamos que no exista:
+    si el mismo envío llega dos veces (por un reintento), no se duplica el registro.
+    """
+    existing = await db.execute(
+        select(ShipmentDeliveryLog).where(ShipmentDeliveryLog.shipment_id == shipment_id)
+    )
+    if existing.scalar_one_or_none() is not None:
+        return  # ya estaba registrado: evitamos el duplicado (consistencia)
+
+    db.add(
+        ShipmentDeliveryLog(
+            shipment_id=shipment_id,
+            order_id=order_id,
+            delivered_at=delivered_at,
+            city=city,
+            delivery_time_minutes=delivery_time_minutes,
+        )
+    )
+    await db.commit()
+
+
+async def insert_order_status(
+    db: AsyncSession,
+    order_id: str,
+    status: str,
+    occurred_at: datetime | None = None,
+) -> None:
+    """Anota el estado de un pedido en order_status_log (para /reports/orders-by-status)."""
+    record = OrderStatusLog(order_id=order_id, status=status)
+    if occurred_at is not None:
+        record.occurred_at = occurred_at
+    db.add(record)
+    await db.commit()
+
+
+async def insert_inventory_shortage(
+    db: AsyncSession,
+    product_id: str,
+    current_stock: int,
+    requested_quantity: int,
+    occurred_at: datetime | None = None,
+) -> None:
+    """Guarda una alerta de quiebre de stock en inventory_shortage_log (modelo ORM)."""
+    record = InventoryShortageLog(
+        product_id=product_id,
+        current_stock=current_stock,
+        requested_quantity=requested_quantity,
+    )
+    if occurred_at is not None:
+        record.occurred_at = occurred_at
+    db.add(record)
     await db.commit()

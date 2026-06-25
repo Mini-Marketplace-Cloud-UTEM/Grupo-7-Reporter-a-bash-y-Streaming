@@ -26,7 +26,7 @@ services:
     volumes:
       - ./migrations:/migrations
     command: >
-      sh -c "psql -h postgres -U ${POSTGRES_USER:-reporteria} -d ${POSTGRES_DB:-reporteria} -f /migrations/001_initial_schema.sql"
+      sh -c "for f in /migrations/*.sql; do echo Aplicando $$f; psql -h postgres -U ${POSTGRES_USER:-reporteria} -d ${POSTGRES_DB:-reporteria} -f $$f; done"
     depends_on:
       postgres:
         condition: service_healthy

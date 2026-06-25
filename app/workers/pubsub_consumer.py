@@ -24,7 +24,12 @@ from app.schemas.events import (
     PaymentApprovedPayload,
     ShipmentDeliveredPayload,
 )
-from app.services.analytics_service import upsert_sales_from_order
+from app.services.analytics_service import (
+    insert_inventory_shortage,
+    insert_order_status,
+    insert_shipment_delivery,
+    upsert_sales_from_order,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +44,12 @@ async def _handle_order_created(payload: dict, correlation_id: str) -> None:
         await upsert_sales_from_order(
             db, data.createdAt, Decimal(str(data.totalAmount)), correlation_id
         )
+        # Si el pedido trae estado, lo anotamos en order_status_log para que
+        # /reports/orders-by-status pueda contarlo (tarea 2.3 de Fran).
+        if data.status:
+            await insert_order_status(
+                db, order_id=data.orderId, status=data.status, occurred_at=data.createdAt
+            )
     logger.info("evento_order_created orderId=%s correlationId=%s", data.orderId, correlation_id)
 
 
@@ -56,8 +67,16 @@ async def _handle_payment_approved(payload: dict, correlation_id: str) -> None:
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_inventory_shortage(payload: dict, correlation_id: str) -> None:
-    """Registra la alerta de quiebre de stock para análisis posterior."""
+    """Guarda la alerta de quiebre de stock en inventory_shortage_log."""
     data = InventoryShortagePayload(**payload)
+    async with AsyncSessionLocal() as db:
+        await insert_inventory_shortage(
+            db,
+            product_id=data.productId,
+            current_stock=data.currentStock,
+            requested_quantity=data.requestedQuantity,
+            occurred_at=data.occurredAt,
+        )
     logger.warning(
         "evento_inventory_shortage productId=%s stockActual=%d solicitado=%d correlationId=%s",
         data.productId,
@@ -69,8 +88,21 @@ async def _handle_inventory_shortage(payload: dict, correlation_id: str) -> None
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_shipment_delivered(payload: dict, correlation_id: str) -> None:
-    """Registra la entrega del envío para métricas de rendimiento de despacho."""
+    """Guarda la entrega en shipment_delivery_log para las métricas de despacho."""
     data = ShipmentDeliveredPayload(**payload)
+
+    # delivery_time_minutes se deja en None: el payload de ShipmentDelivered no trae la
+    # fecha del pedido, así que el tiempo de entrega se calcula en el recálculo batch
+    # (sugerencia 1.1 de Fran). El envío igual queda contado en el total de entregas.
+    async with AsyncSessionLocal() as db:
+        await insert_shipment_delivery(
+            db,
+            shipment_id=data.shipment_id,
+            order_id=data.order_id,
+            delivered_at=data.delivered_at,
+            city=data.city,
+        )
+
     logger.info(
         "evento_shipment_delivered envioId=%s pedidoId=%s ciudad=%s correlationId=%s",
         data.shipment_id,

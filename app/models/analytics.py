@@ -2,8 +2,11 @@
 Modelos ORM de SQLAlchemy (async) para las tablas analíticas en Supabase Postgres.
 
 Tablas:
-    fact_sales_summary  — Agregaciones diarias de ventas (streaming y batch)
-    agg_top_products    — Ranking acumulado de productos por unidades vendidas
+    fact_sales_summary    — Agregaciones diarias de ventas (streaming y batch)
+    agg_top_products      — Ranking acumulado de productos por unidades vendidas
+    shipment_delivery_log — Registro de envíos entregados (métricas de despacho)
+    inventory_shortage_log — Registro de quiebres de stock (alertas)
+    order_status_log       — Registro del estado de los pedidos
 """
 
 import uuid
@@ -61,4 +64,63 @@ class AggTopProduct(Base):
     total_revenue_generated: Mapped[Decimal] = mapped_column(Numeric, nullable=False, default=0)
     last_calculated_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+
+class ShipmentDeliveryLog(Base):
+    """
+    Registro de envíos entregados, poblado por el worker al procesar
+    eventos ShipmentDelivered. Fuente del endpoint /reports/delivery-performance.
+
+    Calcado a migrations/001_initial_schema.sql (tabla shipment_delivery_log).
+    """
+
+    __tablename__ = "shipment_delivery_log"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    shipment_id: Mapped[str] = mapped_column(String, nullable=False, unique=True)
+    order_id: Mapped[str] = mapped_column(String, nullable=False)
+    delivered_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    delivery_time_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
+
+
+class OrderStatusLog(Base):
+    """
+    Registro del estado de los pedidos, poblado por el worker al procesar
+    eventos OrderCreated (cuando traen status). Fuente del endpoint
+    /reports/orders-by-status.
+
+    Calcado a migrations/001_initial_schema.sql (tabla order_status_log).
+    """
+
+    __tablename__ = "order_status_log"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    order_id: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
+
+
+class InventoryShortageLog(Base):
+    """
+    Registro de quiebres de stock, poblado por el worker al procesar
+    eventos InventoryShortage. Alimenta las alertas del panel del administrador.
+
+    Calcado a migrations/002_inventory_shortage.sql (tabla inventory_shortage_log).
+    """
+
+    __tablename__ = "inventory_shortage_log"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    product_id: Mapped[str] = mapped_column(String, nullable=False)
+    current_stock: Mapped[int] = mapped_column(Integer, nullable=False)
+    requested_quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
     )
