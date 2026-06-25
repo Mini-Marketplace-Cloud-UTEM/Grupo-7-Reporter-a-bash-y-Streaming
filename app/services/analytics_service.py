@@ -88,7 +88,9 @@ async def get_orders_by_status(db: AsyncSession, use_mocks: bool = False) -> lis
     return [OrderStatusCount(status=r[0], count=r[1]) for r in rows]
 
 
-async def get_top_products(db: AsyncSession, page: int, page_size: int, use_mocks: bool = False) -> TopProductsResponse:
+async def get_top_products(
+    db: AsyncSession, page: int, page_size: int, use_mocks: bool = False
+) -> TopProductsResponse:
     """Retorna el ranking paginado de productos ordenados por unidades vendidas."""
     if use_mocks:
         return mock_data.top_products(page, page_size)
@@ -159,7 +161,9 @@ async def get_peak_hours(db: AsyncSession, use_mocks: bool = False) -> list[Peak
     return [PeakHourItem(hour=r[0], orderCount=r[1]) for r in rows]
 
 
-async def get_delivery_performance(db: AsyncSession, use_mocks: bool = False) -> DeliveryPerformanceResponse:
+async def get_delivery_performance(
+    db: AsyncSession, use_mocks: bool = False
+) -> DeliveryPerformanceResponse:
     """
     Retorna el tiempo promedio de entrega y el total de envíos completados.
 
