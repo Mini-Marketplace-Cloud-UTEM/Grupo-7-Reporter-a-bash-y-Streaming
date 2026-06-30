@@ -23,6 +23,7 @@ async def _mock_get_db():
     mock_session.execute.return_value = mock_result
     yield mock_session
 
+
 # Headers mínimos requeridos por todos los endpoints
 HEADERS = {
     "X-Request-Id": str(uuid.uuid4()),
@@ -336,6 +337,7 @@ async def test_recalculo_batch_con_body_fechas(client):
 # ---------------------------------------------------------------------------
 # Validación de UUID inválido en headers
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.asyncio
 async def test_reporte_ventas_request_id_invalido(client):
