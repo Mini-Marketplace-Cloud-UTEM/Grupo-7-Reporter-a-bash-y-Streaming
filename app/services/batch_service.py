@@ -67,7 +67,7 @@ async def run_batch_recalculate(
     await _update_job_status(db, idempotency_key, "RUNNING")
 
     try:
-        client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
+        client = create_client(settings.SUPABASE_URL, settings.SUPABASE_SECRET_KEY)
         bucket = "event-logs"
 
         files = client.storage.from_(bucket).list()

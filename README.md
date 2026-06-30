@@ -117,7 +117,8 @@ Edita `.env` y completa todos los valores:
 | `APP_ENV` | Entorno de ejecucion | `development` |
 | `APP_PORT` | Puerto en que escucha el servidor | `8070` |
 | `SUPABASE_URL` | URL del proyecto Supabase | `https://xxxx.supabase.co` |
-| `SUPABASE_ANON_KEY` | Clave anonima de Supabase | `eyJhbGci...` |
+| `SUPABASE_PUBLISHABLE_KEY` | Clave publica de Supabase (antes `anon_key`), para uso en cliente/frontend | `eyJhbGci...` |
+| `SUPABASE_SECRET_KEY` | Clave secreta de Supabase (antes `service_role_key`), con privilegios elevados para uso en backend | `eyJhbGci...` |
 | `DATABASE_URL` | Cadena de conexion asyncpg a Postgres | `postgresql+asyncpg://user:pass@host:5432/dbname` |
 | `GOOGLE_CLOUD_PROJECT` | ID del proyecto de Google Cloud | `mi-proyecto-gcp` |
 | `PUBSUB_SUBSCRIPTION_ORDER_CREATED` | Ruta completa de la suscripcion de pedidos creados | `projects/xxx/subscriptions/order-created-sub` |
