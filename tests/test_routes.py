@@ -6,12 +6,23 @@ paths, códigos HTTP, validación de headers obligatorios y estructura de respue
 """
 
 import uuid
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.db.session import get_db
 from app.main import app
+
+
+async def _mock_get_db():
+    """Mock de AsyncSession que simula un job nuevo (sin duplicado de idempotency_key)."""
+    mock_session = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    mock_session.execute.return_value = mock_result
+    yield mock_session
+
 
 # Headers mínimos requeridos por todos los endpoints
 HEADERS = {
@@ -71,8 +82,12 @@ async def test_recalculo_batch_sin_idempotency(client):
 async def test_recalculo_batch_ok(client):
     """Con todos los headers el recálculo debe retornar 202 con jobId y status QUEUED."""
     headers = {**HEADERS, "Idempotency-Key": str(uuid.uuid4())}
-    with patch("app.api.routes.batch.run_batch_recalculate", new_callable=AsyncMock):
-        r = await client.post("/reports/batch/recalculate", headers=headers, json={})
+    app.dependency_overrides[get_db] = _mock_get_db
+    try:
+        with patch("app.api.routes.batch.run_batch_recalculate", new_callable=AsyncMock):
+            r = await client.post("/reports/batch/recalculate", headers=headers, json={})
+    finally:
+        app.dependency_overrides.pop(get_db, None)
     assert r.status_code == 202
     body = r.json()
     assert body["status"] == "QUEUED"
@@ -303,12 +318,16 @@ async def test_reporte_ventas_fecha_invalida(client):
 async def test_recalculo_batch_con_body_fechas(client):
     """Con body que incluye from y to debe retornar 202."""
     headers = {**HEADERS, "Idempotency-Key": str(uuid.uuid4())}
-    with patch("app.api.routes.batch.run_batch_recalculate", new_callable=AsyncMock):
-        r = await client.post(
-            "/reports/batch/recalculate",
-            headers=headers,
-            json={"from": "2024-01-01", "to": "2024-01-31"},
-        )
+    app.dependency_overrides[get_db] = _mock_get_db
+    try:
+        with patch("app.api.routes.batch.run_batch_recalculate", new_callable=AsyncMock):
+            r = await client.post(
+                "/reports/batch/recalculate",
+                headers=headers,
+                json={"from": "2024-01-01", "to": "2024-01-31"},
+            )
+    finally:
+        app.dependency_overrides.pop(get_db, None)
     assert r.status_code == 202
     body = r.json()
     assert body["status"] == "QUEUED"
@@ -316,35 +335,35 @@ async def test_recalculo_batch_con_body_fechas(client):
 
 
 # ---------------------------------------------------------------------------
-# Validación de UUID inválido en headers (debe retornar 400, no 422)
+# Validación de UUID inválido en headers
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
 async def test_reporte_ventas_request_id_invalido(client):
-    """X-Request-Id con valor no UUID debe retornar 400 con código INVALID_HEADER."""
+    """X-Request-Id con valor no UUID debe retornar 422 con código INVALID_HEADER."""
     headers = {**HEADERS, "X-Request-Id": "no-es-uuid"}
     r = await client.get("/reports/sales", headers=headers)
-    assert r.status_code == 400
+    assert r.status_code == 422
     body = r.json()
     assert body["detail"]["code"] == "INVALID_HEADER"
 
 
 @pytest.mark.asyncio
 async def test_reporte_ventas_correlation_id_invalido(client):
-    """X-Correlation-Id con valor no UUID debe retornar 400 con código INVALID_HEADER."""
+    """X-Correlation-Id con valor no UUID debe retornar 422 con código INVALID_HEADER."""
     headers = {**HEADERS, "X-Correlation-Id": "no-es-uuid"}
     r = await client.get("/reports/sales", headers=headers)
-    assert r.status_code == 400
+    assert r.status_code == 422
     body = r.json()
     assert body["detail"]["code"] == "INVALID_HEADER"
 
 
 @pytest.mark.asyncio
 async def test_recalculo_batch_idempotency_key_invalida(client):
-    """Idempotency-Key con valor no UUID debe retornar 400 con código INVALID_HEADER."""
+    """Idempotency-Key con valor no UUID debe retornar 422 con código INVALID_HEADER."""
     headers = {**HEADERS, "Idempotency-Key": "no-es-uuid"}
     r = await client.post("/reports/batch/recalculate", headers=headers, json={})
-    assert r.status_code == 400
+    assert r.status_code == 422
     body = r.json()
     assert body["detail"]["code"] == "INVALID_HEADER"

@@ -24,15 +24,26 @@ async def require_headers(
             UUID(value)
         except ValueError as err:
             raise HTTPException(
-                status_code=400,
+                status_code=422,
                 detail={
                     "timestamp": datetime.now(UTC).isoformat(),
-                    "status": 400,
+                    "status": 422,
                     "code": "INVALID_HEADER",
                     "message": f"El header {name} debe ser un UUID válido",
                     "correlationId": None,
                 },
             ) from err
+    if x_consumer.strip() == "":
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "timestamp": datetime.now(UTC).isoformat(),
+                "status": 422,
+                "code": "INVALID_HEADER",
+                "message": "El header X-Consumer no puede estar vacío",
+                "correlationId": None,
+            },
+        )
     return {
         "x_request_id": x_request_id,
         "x_correlation_id": x_correlation_id,
@@ -56,15 +67,26 @@ async def require_headers_with_idempotency(
             UUID(value)
         except ValueError as err:
             raise HTTPException(
-                status_code=400,
+                status_code=422,
                 detail={
                     "timestamp": datetime.now(UTC).isoformat(),
-                    "status": 400,
+                    "status": 422,
                     "code": "INVALID_HEADER",
                     "message": f"El header {name} debe ser un UUID válido",
                     "correlationId": None,
                 },
             ) from err
+    if x_consumer.strip() == "":
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "timestamp": datetime.now(UTC).isoformat(),
+                "status": 422,
+                "code": "INVALID_HEADER",
+                "message": "El header X-Consumer no puede estar vacío",
+                "correlationId": None,
+            },
+        )
     return {
         "x_request_id": x_request_id,
         "x_correlation_id": x_correlation_id,

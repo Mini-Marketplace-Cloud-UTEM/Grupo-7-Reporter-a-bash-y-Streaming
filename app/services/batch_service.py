@@ -14,29 +14,58 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from uuid import UUID
 
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from supabase import create_client
 
 from app.config import settings
-from app.models.analytics import FactSalesSummary
+from app.models.analytics import BatchJob, FactSalesSummary
 from app.services.analytics_service import upsert_sales_from_order
 
 logger = logging.getLogger(__name__)
 
 
-async def run_batch_recalculate(
-    db: AsyncSession, from_date: date | None, to_date: date | None, job_id: UUID
+async def _update_job_status(
+    db: AsyncSession, idempotency_key: UUID | None, status: str, completed: bool = False
 ) -> None:
+    """Actualiza el estado de un BatchJob identificado por idempotency_key."""
+    if idempotency_key is None:
+        return
+    values: dict = {"status": status}
+    if completed:
+        values["completed_at"] = datetime.now(UTC)
+    await db.execute(
+        update(BatchJob).where(BatchJob.idempotency_key == idempotency_key).values(**values)
+    )
+    await db.commit()
+
+
+async def run_batch_recalculate(
+    db: AsyncSession,
+    from_date: date | None,
+    to_date: date | None,
+    job_id: UUID,
+    idempotency_key: UUID | None = None,
+) -> int:
     """
     Ejecuta el recálculo completo de agregaciones para el rango de fechas indicado.
 
     Pasos:
-        1. Lista todos los archivos de log en el bucket de Supabase Storage.
-        2. Descarga y parsea cada archivo; filtra por rango de fechas si se especificó.
-        3. Reproesa cada evento relevante actualizando las tablas analíticas.
-        4. Marca los registros del rango como BATCH_RECALCULATED.
+        1. Marca el job como RUNNING en batch_jobs (si se proporcionó idempotency_key).
+        2. Lista todos los archivos de log en el bucket de Supabase Storage.
+        3. Descarga y parsea cada archivo; filtra por rango de fechas si se especificó.
+        4. Reprocesa cada evento relevante actualizando las tablas analíticas.
+        5. Marca los registros del rango como BATCH_RECALCULATED.
+        6. Actualiza el job a COMPLETED (o FAILED si hay excepción).
+
+    Retorna:
+        Número de eventos procesados.
     """
     logger.info("recalculo_batch_inicio job_id=%s desde=%s hasta=%s", job_id, from_date, to_date)
+
+    # Marcar como RUNNING al iniciar
+    await _update_job_status(db, idempotency_key, "RUNNING")
+
     try:
         client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
         bucket = "event-logs"
@@ -83,7 +112,6 @@ async def run_batch_recalculate(
 
         # Marcar todos los registros del rango como recalculados por proceso batch
         from sqlalchemy import func as sa_func
-        from sqlalchemy import update
 
         stmt = update(FactSalesSummary).values(
             aggregation_type="BATCH_RECALCULATED", updated_at=datetime.now(UTC)
@@ -102,5 +130,14 @@ async def run_batch_recalculate(
         await db.commit()
 
         logger.info("recalculo_batch_completado job_id=%s eventos_procesados=%d", job_id, processed)
+
+        # Marcar job como COMPLETED
+        await _update_job_status(db, idempotency_key, "COMPLETED", completed=True)
+
+        return processed
+
     except Exception:
         logger.exception("recalculo_batch_error job_id=%s", job_id)
+        # Marcar job como FAILED
+        await _update_job_status(db, idempotency_key, "FAILED", completed=True)
+        return 0
