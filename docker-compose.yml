@@ -25,11 +25,9 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:-reporteria}
     volumes:
       - ./migrations:/migrations
-    command: >
-      sh -c "psql -h postgres -U ${POSTGRES_USER:-reporteria} -d ${POSTGRES_DB:-reporteria} -f /migrations/001_initial_schema.sql"
+    command: sh -c "psql -h postgres -U ${POSTGRES_USER:-reporteria} -d ${POSTGRES_DB:-reporteria} -f /migrations/001_initial_schema.sql && psql -h postgres -U ${POSTGRES_USER:-reporteria} -d ${POSTGRES_DB:-reporteria} -f /migrations/002_inventory_shortage.sql && psql -h postgres -U ${POSTGRES_USER:-reporteria} -d ${POSTGRES_DB:-reporteria} -f /migrations/003_batch_jobs.sql"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     restart: on-failure
 
   api:
@@ -40,11 +38,12 @@ services:
       - .env
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-reporteria}:${POSTGRES_PASSWORD:-reporteria}@postgres:5432/${POSTGRES_DB:-reporteria}
+      PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+      GOOGLE_CLOUD_PROJECT: mini-marketplace-utem
     depends_on:
-      postgres:
-        condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
+      - postgres
+      - migrate
+      - pubsub-emulator
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8070/health"]
@@ -52,5 +51,11 @@ services:
       timeout: 5s
       retries: 3
 
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    ports:
+      - "8085:8085"
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+
 volumes:
-  postgres_data:
+  postgres_data: {}
