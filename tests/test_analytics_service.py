@@ -483,3 +483,75 @@ async def test_log_shipment_delivery_acepta_campos_opcionales_nulos():
     assert added_obj.city is None
     assert added_obj.delivery_time_minutes is None
     mock_db.commit.assert_awaited_once()
+
+
+# ---------------------------------------------------------------------------
+# log_order_status — comportamiento de log puro (no upsert)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_log_order_status_es_log_puro_no_upsert():
+    """
+    log_order_status debe crear un nuevo registro en cada llamada.
+
+    A diferencia de log_shipment_delivery (upsert por shipment_id),
+    esta función no comprueba si ya existe una entrada para el mismo
+    order_id: simplemente inserta. Así el conteo en get_orders_by_status
+    refleja cada transición de estado, no solo la última.
+    """
+    mock_db = AsyncMock()
+    occurred_at = datetime(2024, 6, 15, 10, 0, 0)
+
+    await log_order_status(mock_db, order_id="ORD-001", status="CREATED", occurred_at=occurred_at)
+    await log_order_status(mock_db, order_id="ORD-001", status="CONFIRMED", occurred_at=occurred_at)
+
+    # Dos llamadas = dos add(), uno por cada cambio de estado
+    assert mock_db.add.call_count == 2
+    assert mock_db.commit.await_count == 2
+    # La función no ejecuta ningún SELECT previo (no es upsert)
+    mock_db.execute.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# get_orders_by_status — un único estado
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_orders_by_status_un_unico_estado():
+    """Con solo un estado registrado debe retornar una lista con un único elemento."""
+    mock_db = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.fetchall.return_value = [("CREATED", 1)]
+    mock_db.execute.return_value = mock_result
+
+    result = await get_orders_by_status(mock_db)
+
+    assert len(result) == 1
+    assert result[0].status == "CREATED"
+    assert result[0].count == 1
+
+
+# ---------------------------------------------------------------------------
+# get_peak_hours — hora 0 (medianoche)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_get_peak_hours_incluye_hora_cero():
+    """
+    La hora 0 (medianoche) debe ser manejada correctamente.
+
+    func.extract devuelve un float (0.0); int(0.0) debe ser 0 sin error.
+    """
+    mock_db = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.fetchall.return_value = [(0.0, 3), (14.0, 8)]
+    mock_db.execute.return_value = mock_result
+
+    result = await get_peak_hours(mock_db)
+
+    assert result[0].hour == 0
+    assert result[0].orderCount == 3
+    assert result[1].hour == 14
