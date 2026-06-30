@@ -84,9 +84,8 @@ async def get_orders_by_status(db: AsyncSession, use_mocks: bool = False) -> lis
     if use_mocks:
         return mock_data.orders_by_status()
 
-    stmt = (
-        select(OrderStatusLog.status, func.count().label("count"))
-        .group_by(OrderStatusLog.status)
+    stmt = select(OrderStatusLog.status, func.count().label("count")).group_by(
+        OrderStatusLog.status
     )
     raw = await db.execute(stmt)
     rows = raw.fetchall()
