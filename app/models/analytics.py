@@ -4,6 +4,7 @@ Modelos ORM de SQLAlchemy (async) para las tablas analíticas en Supabase Postgr
 Tablas:
     fact_sales_summary  — Agregaciones diarias de ventas (streaming y batch)
     agg_top_products    — Ranking acumulado de productos por unidades vendidas
+    batch_jobs          — Control de idempotencia para el proceso batch de recálculo
 """
 
 import uuid
@@ -11,6 +12,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import CheckConstraint, DateTime, Integer, Numeric, String, func
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -62,3 +64,23 @@ class AggTopProduct(Base):
     last_calculated_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.now(), onupdate=func.now()
     )
+
+
+class BatchJob(Base):
+    """
+    Tabla de control de idempotencia para el proceso batch de recálculo.
+
+    Cada `idempotency_key` queda registrada con su `job_id` y `status`
+    para evitar ejecuciones duplicadas ante reintentos del cliente.
+    Los estados posibles son: QUEUED, RUNNING, COMPLETED, FAILED.
+    """
+
+    __tablename__ = "batch_jobs"
+
+    idempotency_key: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True)
+    job_id: Mapped[uuid.UUID] = mapped_column(PG_UUID(as_uuid=True), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="QUEUED")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

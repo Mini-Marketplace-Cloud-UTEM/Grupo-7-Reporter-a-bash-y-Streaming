@@ -55,6 +55,8 @@ async def get_orders_by_status(
     db: AsyncSession = Depends(get_db),
     use_mocks: bool = Depends(get_use_mocks),
 ):
+    # TODO(avance-3): Este endpoint requiere que el worker _handle_order_created
+    # también inserte en order_status_log. Coordinar con Rol 1 (Agustín).
     return await analytics_service.get_orders_by_status(db, use_mocks=use_mocks)
 
 

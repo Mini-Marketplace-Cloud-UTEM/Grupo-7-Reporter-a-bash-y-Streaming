@@ -164,8 +164,11 @@ app.add_middleware(MockStatusMiddleware)
 @app.middleware("http")
 async def inject_request_id(request: Request, call_next):
     request_id = request.headers.get("X-Request-Id", str(uuid.uuid4()))
+    correlation_id = request.headers.get("X-Correlation-Id", "")
     response = await call_next(request)
     response.headers["X-Request-Id"] = request_id
+    if correlation_id:
+        response.headers["X-Correlation-Id"] = correlation_id
     return response
 
 

@@ -59,9 +59,10 @@ async def main() -> None:
     )
 
     async with AsyncSessionLocal() as db:
-        await run_batch_recalculate(db, args.from_date, args.to_date, job_id)
+        processed = await run_batch_recalculate(db, args.from_date, args.to_date, job_id)
 
-    logging.info("Recálculo batch completado job_id=%s", job_id)
+    logging.info("Recálculo batch completado job_id=%s eventos_procesados=%d", job_id, processed)
+    print(f"job_id={job_id} eventos_procesados={processed}")
 
 
 if __name__ == "__main__":
