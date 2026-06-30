@@ -19,6 +19,8 @@ from app.services.analytics_service import (
     get_peak_hours,
     get_sales_report,
     get_top_products,
+    log_order_status,
+    log_shipment_delivery,
     upsert_sales_from_order,
     upsert_top_product,
 )
@@ -377,4 +379,107 @@ async def test_upsert_top_product_registro_existente():
     assert registro_existente.total_units_sold == 13
     assert registro_existente.total_revenue_generated == Decimal("130000")
     mock_db.add.assert_not_called()
+    mock_db.commit.assert_awaited_once()
+
+
+# ---------------------------------------------------------------------------
+# log_order_status
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_log_order_status_inserta_registro():
+    """Debe añadir un OrderStatusLog a la sesión y hacer commit."""
+    mock_db = AsyncMock()
+    occurred_at = datetime(2024, 6, 15, 10, 0, 0)
+
+    await log_order_status(mock_db, order_id="ORD-001", status="CREATED", occurred_at=occurred_at)
+
+    mock_db.add.assert_called_once()
+    added_obj = mock_db.add.call_args.args[0]
+    assert added_obj.order_id == "ORD-001"
+    assert added_obj.status == "CREATED"
+    assert added_obj.occurred_at == occurred_at
+    mock_db.commit.assert_awaited_once()
+
+
+# ---------------------------------------------------------------------------
+# log_shipment_delivery
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_log_shipment_delivery_inserta_nuevo_registro():
+    """Sin registro previo para el shipment_id debe insertar y hacer commit."""
+    mock_db = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    mock_db.execute.return_value = mock_result
+
+    delivered_at = datetime(2024, 6, 15, 14, 30, 0)
+
+    await log_shipment_delivery(
+        mock_db,
+        shipment_id="SHP-001",
+        order_id="ORD-001",
+        delivered_at=delivered_at,
+        city="Santiago",
+        delivery_time_minutes=45,
+    )
+
+    mock_db.add.assert_called_once()
+    added_obj = mock_db.add.call_args.args[0]
+    assert added_obj.shipment_id == "SHP-001"
+    assert added_obj.order_id == "ORD-001"
+    assert added_obj.delivered_at == delivered_at
+    assert added_obj.city == "Santiago"
+    assert added_obj.delivery_time_minutes == 45
+    mock_db.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_log_shipment_delivery_no_duplica_registro_existente():
+    """Si ya existe un registro para el shipment_id no debe insertar ni hacer commit."""
+    mock_db = AsyncMock()
+    registro_existente = MagicMock()
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = registro_existente
+    mock_db.execute.return_value = mock_result
+
+    delivered_at = datetime(2024, 6, 15, 14, 30, 0)
+
+    await log_shipment_delivery(
+        mock_db,
+        shipment_id="SHP-001",
+        order_id="ORD-001",
+        delivered_at=delivered_at,
+        city="Valparaíso",
+        delivery_time_minutes=None,
+    )
+
+    mock_db.add.assert_not_called()
+    mock_db.commit.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_log_shipment_delivery_acepta_campos_opcionales_nulos():
+    """Debe funcionar correctamente cuando city y delivery_time_minutes son None."""
+    mock_db = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    mock_db.execute.return_value = mock_result
+
+    await log_shipment_delivery(
+        mock_db,
+        shipment_id="SHP-002",
+        order_id="ORD-002",
+        delivered_at=datetime(2024, 6, 16, 9, 0, 0),
+        city=None,
+        delivery_time_minutes=None,
+    )
+
+    mock_db.add.assert_called_once()
+    added_obj = mock_db.add.call_args.args[0]
+    assert added_obj.city is None
+    assert added_obj.delivery_time_minutes is None
     mock_db.commit.assert_awaited_once()

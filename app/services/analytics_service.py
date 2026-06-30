@@ -2,17 +2,22 @@
 Servicio de consultas analíticas sobre Supabase Postgres.
 
 Contiene la lógica de negocio para cada endpoint de reportería y las
-funciones de upsert que el worker de Pub/Sub utiliza para actualizar
+funciones de upsert/log que el worker de Pub/Sub utiliza para actualizar
 las métricas en tiempo real.
 """
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.analytics import AggTopProduct, FactSalesSummary
+from app.models.analytics import (
+    AggTopProduct,
+    FactSalesSummary,
+    OrderStatusLog,
+    ShipmentDeliveryLog,
+)
 from app.schemas.responses import (
     AverageTicketResponse,
     DeliveryPerformanceResponse,
@@ -79,9 +84,11 @@ async def get_orders_by_status(db: AsyncSession, use_mocks: bool = False) -> lis
     if use_mocks:
         return mock_data.orders_by_status()
 
-    raw = await db.execute(
-        text("SELECT status, COUNT(*) as count FROM order_status_log GROUP BY status")
+    stmt = (
+        select(OrderStatusLog.status, func.count().label("count"))
+        .group_by(OrderStatusLog.status)
     )
+    raw = await db.execute(stmt)
     rows = raw.fetchall()
     if not rows:
         return []
@@ -151,14 +158,17 @@ async def get_peak_hours(db: AsyncSession, use_mocks: bool = False) -> list[Peak
     if use_mocks:
         return mock_data.peak_hours()
 
-    raw = await db.execute(
-        text(
-            "SELECT EXTRACT(HOUR FROM period_date)::int AS hour, SUM(total_orders_count)::int AS order_count "
-            "FROM fact_sales_summary GROUP BY hour ORDER BY hour"
+    stmt = (
+        select(
+            func.extract("hour", FactSalesSummary.period_date).label("hour"),
+            func.sum(FactSalesSummary.total_orders_count).label("order_count"),
         )
+        .group_by(func.extract("hour", FactSalesSummary.period_date))
+        .order_by(func.extract("hour", FactSalesSummary.period_date))
     )
+    raw = await db.execute(stmt)
     rows = raw.fetchall()
-    return [PeakHourItem(hour=r[0], orderCount=r[1]) for r in rows]
+    return [PeakHourItem(hour=int(r[0]), orderCount=int(r[1])) for r in rows]
 
 
 async def get_delivery_performance(
@@ -173,9 +183,11 @@ async def get_delivery_performance(
     if use_mocks:
         return mock_data.delivery_performance()
 
-    raw = await db.execute(
-        text("SELECT AVG(delivery_time_minutes)::int, COUNT(*)::int " "FROM shipment_delivery_log")
+    stmt = select(
+        func.avg(ShipmentDeliveryLog.delivery_time_minutes).label("avg_time"),
+        func.count().label("total"),
     )
+    raw = await db.execute(stmt)
     row = raw.fetchone()
     avg_time = int(row[0] or 0) if row else 0
     total_count = int(row[1] or 0) if row else 0
@@ -234,3 +246,42 @@ async def upsert_top_product(
             )
         )
     await db.commit()
+
+
+async def log_order_status(
+    db: AsyncSession, order_id: str, status: str, occurred_at: datetime
+) -> None:
+    """Registra un cambio de estado de pedido en order_status_log."""
+    db.add(OrderStatusLog(order_id=order_id, status=status, occurred_at=occurred_at))
+    await db.commit()
+
+
+async def log_shipment_delivery(
+    db: AsyncSession,
+    shipment_id: str,
+    order_id: str,
+    delivered_at: datetime,
+    city: str | None,
+    delivery_time_minutes: int | None,
+) -> None:
+    """
+    Registra la entrega de un envío en shipment_delivery_log (upsert por shipment_id).
+
+    Si el shipment_id ya existe no se duplica el registro, para garantizar
+    idempotencia ante reenvíos del evento ShipmentDelivered.
+    """
+    existing = await db.execute(
+        select(ShipmentDeliveryLog).where(ShipmentDeliveryLog.shipment_id == shipment_id)
+    )
+    record = existing.scalar_one_or_none()
+    if record is None:
+        db.add(
+            ShipmentDeliveryLog(
+                shipment_id=shipment_id,
+                order_id=order_id,
+                delivered_at=delivered_at,
+                city=city,
+                delivery_time_minutes=delivery_time_minutes,
+            )
+        )
+        await db.commit()

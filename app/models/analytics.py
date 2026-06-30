@@ -2,9 +2,11 @@
 Modelos ORM de SQLAlchemy (async) para las tablas analíticas en Supabase Postgres.
 
 Tablas:
-    fact_sales_summary  — Agregaciones diarias de ventas (streaming y batch)
-    agg_top_products    — Ranking acumulado de productos por unidades vendidas
-    batch_jobs          — Control de idempotencia para el proceso batch de recálculo
+    fact_sales_summary      — Agregaciones diarias de ventas (streaming y batch)
+    agg_top_products        — Ranking acumulado de productos por unidades vendidas
+    batch_jobs              — Control de idempotencia para el proceso batch de recálculo
+    order_status_log        — Registro de cambios de estado de pedidos (eventos OrderCreated)
+    shipment_delivery_log   — Registro de entregas de envíos (eventos ShipmentDelivered)
 """
 
 import uuid
@@ -84,3 +86,42 @@ class BatchJob(Base):
         DateTime, nullable=False, server_default=func.now()
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class OrderStatusLog(Base):
+    """
+    Tabla auxiliar que registra cambios de estado de pedidos.
+
+    Poblada por el worker al procesar eventos OrderCreated y actualizaciones
+    de estado. Se consulta en el endpoint de distribución de pedidos por estado.
+    """
+
+    __tablename__ = "order_status_log"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    order_id: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )
+
+
+class ShipmentDeliveryLog(Base):
+    """
+    Tabla auxiliar que registra entregas de envíos completadas.
+
+    Poblada por el worker al procesar eventos ShipmentDelivered. Se consulta
+    en el endpoint de rendimiento de despacho (tiempo promedio y total de envíos).
+    """
+
+    __tablename__ = "shipment_delivery_log"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    shipment_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    order_id: Mapped[str] = mapped_column(String, nullable=False)
+    delivered_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    city: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    delivery_time_minutes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    recorded_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.now()
+    )

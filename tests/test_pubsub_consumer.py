@@ -89,16 +89,13 @@ def _construir_mensaje_pubsub(event_type: str, payload: dict) -> MagicMock:
 
 @pytest.mark.asyncio
 async def test_handle_order_created_llama_upsert():
-    """El handler de OrderCreated debe llamar a upsert_sales_from_order con los datos correctos."""
+    """El handler de OrderCreated debe llamar a upsert_sales_from_order y a log_order_status."""
     payload = _payload_order_created()
     correlation_id = str(uuid.uuid4())
 
     mock_session = AsyncMock()
     mock_session.__aenter__ = AsyncMock(return_value=mock_session)
     mock_session.__aexit__ = AsyncMock(return_value=False)
-    mock_execute_result = MagicMock()
-    mock_execute_result.scalar_one_or_none.return_value = None
-    mock_session.execute.return_value = mock_execute_result
 
     with (
         patch("app.workers.pubsub_consumer.AsyncSessionLocal", return_value=mock_session),
@@ -106,6 +103,10 @@ async def test_handle_order_created_llama_upsert():
             "app.workers.pubsub_consumer.upsert_sales_from_order",
             new_callable=AsyncMock,
         ) as mock_upsert,
+        patch(
+            "app.workers.pubsub_consumer.log_order_status",
+            new_callable=AsyncMock,
+        ) as mock_log_status,
     ):
         await _handle_order_created(payload, correlation_id)
 
@@ -115,6 +116,11 @@ async def test_handle_order_created_llama_upsert():
     from decimal import Decimal
 
     assert args[2] == Decimal("49990")
+
+    mock_log_status.assert_awaited_once()
+    status_kwargs = mock_log_status.call_args.kwargs
+    assert status_kwargs["order_id"] == "ORD-001"
+    assert status_kwargs["status"] == "CREATED"
 
 
 @pytest.mark.asyncio
@@ -186,12 +192,30 @@ async def test_handle_inventory_shortage_payload_invalido_lanza_error():
 
 
 @pytest.mark.asyncio
-async def test_handle_shipment_delivered_loguea_info():
-    """El handler de ShipmentDelivered debe loguear con shipment_id y order_id."""
+async def test_handle_shipment_delivered_persiste_y_loguea():
+    """El handler de ShipmentDelivered debe persistir la entrega y loguear el evento."""
     payload = _payload_shipment_delivered()
 
-    with patch("app.workers.pubsub_consumer.logger") as mock_logger:
+    mock_session = AsyncMock()
+    mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+    mock_session.__aexit__ = AsyncMock(return_value=False)
+
+    with (
+        patch("app.workers.pubsub_consumer.AsyncSessionLocal", return_value=mock_session),
+        patch(
+            "app.workers.pubsub_consumer.log_shipment_delivery",
+            new_callable=AsyncMock,
+        ) as mock_log_delivery,
+        patch("app.workers.pubsub_consumer.logger") as mock_logger,
+    ):
         await _handle_shipment_delivered(payload, "corr-000")
+
+    mock_log_delivery.assert_awaited_once()
+    delivery_kwargs = mock_log_delivery.call_args.kwargs
+    assert delivery_kwargs["shipment_id"] == "SHP-001"
+    assert delivery_kwargs["order_id"] == "ORD-001"
+    assert delivery_kwargs["city"] == "Santiago"
+    assert delivery_kwargs["delivery_time_minutes"] is None
 
     mock_logger.info.assert_called_once()
     call_str = str(mock_logger.info.call_args)
