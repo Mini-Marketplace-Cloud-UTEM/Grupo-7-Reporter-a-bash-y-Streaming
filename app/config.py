@@ -22,8 +22,11 @@ class Settings(BaseSettings):
     USE_MOCKS: bool = False
 
     # Supabase (base de datos y storage)
+    # SUPABASE_PUBLISHABLE_KEY: clave pública (antes anon_key), segura para uso en cliente/frontend.
+    # SUPABASE_SECRET_KEY: clave secreta (antes service_role_key), con privilegios elevados para uso en backend.
     SUPABASE_URL: str = ""
-    SUPABASE_ANON_KEY: str = ""
+    SUPABASE_PUBLISHABLE_KEY: str = ""
+    SUPABASE_SECRET_KEY: str = ""
     DATABASE_URL: str = ""
 
     # Google Cloud Pub/Sub — suscripciones a los tópicos de eventos upstream
