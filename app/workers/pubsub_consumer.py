@@ -24,7 +24,11 @@ from app.schemas.events import (
     PaymentApprovedPayload,
     ShipmentDeliveredPayload,
 )
-from app.services.analytics_service import upsert_sales_from_order
+from app.services.analytics_service import (
+    log_order_status,
+    log_shipment_delivery,
+    upsert_sales_from_order,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +37,17 @@ _executor = ThreadPoolExecutor(max_workers=4)
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_order_created(payload: dict, correlation_id: str) -> None:
-    """Acumula las ventas del pedido en fact_sales_summary (modo REAL_TIME)."""
+    """Acumula las ventas del pedido en fact_sales_summary y registra el estado inicial en order_status_log."""
     data = OrderCreatedPayload(**payload)
     async with AsyncSessionLocal() as db:
         await upsert_sales_from_order(
             db, data.createdAt, Decimal(str(data.totalAmount)), correlation_id
+        )
+        await log_order_status(
+            db,
+            order_id=data.orderId,
+            status=data.status or "CREATED",
+            occurred_at=data.createdAt,
         )
     logger.info("evento_order_created orderId=%s correlationId=%s", data.orderId, correlation_id)
 
@@ -69,8 +79,17 @@ async def _handle_inventory_shortage(payload: dict, correlation_id: str) -> None
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
 async def _handle_shipment_delivered(payload: dict, correlation_id: str) -> None:
-    """Registra la entrega del envío para métricas de rendimiento de despacho."""
+    """Persiste la entrega del envío en shipment_delivery_log y loguea el evento."""
     data = ShipmentDeliveredPayload(**payload)
+    async with AsyncSessionLocal() as db:
+        await log_shipment_delivery(
+            db,
+            shipment_id=data.shipment_id,
+            order_id=data.order_id,
+            delivered_at=data.delivered_at,
+            city=data.city,
+            delivery_time_minutes=None,  # el payload de ShipmentDelivered no incluye este campo
+        )
     logger.info(
         "evento_shipment_delivered envioId=%s pedidoId=%s ciudad=%s correlationId=%s",
         data.shipment_id,
