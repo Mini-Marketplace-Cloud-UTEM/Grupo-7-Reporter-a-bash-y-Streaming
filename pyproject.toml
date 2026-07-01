@@ -5,6 +5,7 @@ exclude = [
     ".venv",
     "__pycache__",
     "migrations",
+    "alembic/versions",
     ".git",
 ]
 
