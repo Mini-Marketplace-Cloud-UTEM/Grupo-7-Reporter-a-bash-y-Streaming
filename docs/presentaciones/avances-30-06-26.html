@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grupo 7 — Avance 30-06-26 · Entregables</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3352;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --accent3: #ff6b6b;
+      --accent4: #ffd166;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --get: #22c55e;
+      --post: #f97316;
+      --badge-bg-get: rgba(34,197,94,.15);
+      --badge-bg-post: rgba(249,115,22,.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .slides { width: 100%; }
+
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    section + section { border-top: 1px solid var(--border); }
+
+    /* ── Cover ── */
+    #cover {
+      background: radial-gradient(ellipse at 60% 40%, #1e1b4b 0%, #0f1117 70%);
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    #cover .tag {
+      font-size: .8rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.3);
+      padding: .35rem .9rem;
+      border-radius: 9999px;
+    }
+
+    #cover h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    #cover h1 span { color: var(--accent2); }
+
+    #cover p.subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 640px;
+    }
+
+    #cover .meta {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: .5rem;
+    }
+
+    #cover .meta-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .2rem;
+    }
+
+    #cover .meta-item span:first-child {
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+    }
+
+    #cover .meta-item span:last-child {
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    /* ── Section title ── */
+    .section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-header .eyebrow {
+      font-size: .75rem;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: .5rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700;
+    }
+
+    .section-header p {
+      color: var(--muted);
+      margin-top: .5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── Content wrapper ── */
+    .content { width: 100%; max-width: 960px; }
+
+    /* ── Divider ── */
+    .divider {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 9999px;
+      margin: .8rem auto 0;
+    }
+
+    /* ── Entregables table ── */
+    #entregables { background: var(--surface); }
+
+    .deliverables-table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .deliverables-table thead tr {
+      background: linear-gradient(90deg, rgba(108,99,255,.25), rgba(0,212,170,.15));
+    }
+
+    .deliverables-table thead th {
+      padding: .9rem 1.2rem;
+      font-size: .8rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .deliverables-table tbody tr {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+
+    .deliverables-table tbody tr:hover { background: rgba(108,99,255,.06); }
+    .deliverables-table tbody tr:last-child { border-bottom: none; }
+
+    .deliverables-table td {
+      padding: 1rem 1.2rem;
+      vertical-align: middle;
+    }
+
+    .del-num {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .del-name {
+      font-weight: 600;
+      font-size: .95rem;
+    }
+
+    .del-format {
+      font-size: .82rem;
+      color: var(--muted);
+      font-family: monospace;
+    }
+
+    .del-evidence {
+      font-size: .82rem;
+      color: var(--accent2);
+    }
+
+    .del-status {
+      white-space: nowrap;
+      font-size: .78rem;
+      font-weight: 700;
+      padding: .3rem .75rem;
+      border-radius: 9999px;
+      display: inline-block;
+    }
+
+    .status-done {
+      background: rgba(34,197,94,.12);
+      color: var(--get);
+      border: 1px solid rgba(34,197,94,.3);
+    }
+
+    .status-partial {
+      background: rgba(255,209,102,.1);
+      color: var(--accent4);
+      border: 1px solid rgba(255,209,102,.3);
+    }
+
+    /* ── URL section ── */
+    #url-cloud { background: var(--bg); }
+
+    .url-showcase {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .url-main-card {
+      background: linear-gradient(135deg, rgba(0,212,170,.08), rgba(108,99,255,.06));
+      border: 1px solid rgba(0,212,170,.3);
+      border-radius: 16px;
+      padding: 2rem 2.4rem;
+      text-align: center;
+    }
+
+    .url-main-card .url-label {
+      font-size: .75rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: .8rem;
+    }
+
+    .url-main-card .url-value {
+      font-family: 'Courier New', monospace;
+      font-size: clamp(.9rem, 2vw, 1.2rem);
+      font-weight: 700;
+      color: var(--accent2);
+      word-break: break-all;
+    }
+
+    .url-main-card .url-platform {
+      margin-top: .7rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+
+    .url-endpoints-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .url-ep-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.3rem;
+    }
+
+    .url-ep-card .ep-route {
+      font-family: monospace;
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: .4rem;
+    }
+
+    .url-ep-card .ep-desc {
+      font-size: .8rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── DB section ── */
+    #base-datos { background: var(--surface); }
+
+    .db-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (max-width: 700px) { .db-layout { grid-template-columns: 1fr; } }
+
+    .db-info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .db-badge-card {
+      background: linear-gradient(135deg, rgba(0,212,170,.07), rgba(108,99,255,.05));
+      border: 1px solid rgba(0,212,170,.25);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .db-badge-card h3 {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .6rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .db-badge-card p {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .db-tables-panel {
+      display: flex;
+      flex-direction: column;
+      gap: .8rem;
+    }
+
+    .table-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+    }
+
+    .table-card .tname {
+      font-family: monospace;
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--accent4);
+      margin-bottom: .5rem;
+    }
+
+    .table-card .tfields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+    }
+
+    .tfield {
+      font-family: monospace;
+      font-size: .72rem;
+      padding: .15rem .45rem;
+      border-radius: 4px;
+      background: rgba(108,99,255,.1);
+      border: 1px solid rgba(108,99,255,.2);
+      color: #a5b4fc;
+    }
+
+    .tfield.pk {
+      background: rgba(255,209,102,.1);
+      border-color: rgba(255,209,102,.25);
+      color: var(--accent4);
+    }
+
+    /* ── Docs section ── */
+    #documentacion { background: var(--bg); }
+
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (max-width: 700px) { .docs-layout { grid-template-columns: 1fr; } }
+
+    .docs-endpoint-list { display: flex; flex-direction: column; gap: .9rem; }
+
+    .doc-endpoint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .doc-endpoint:hover { border-color: var(--accent); transition: border-color .2s; }
+
+    .badge {
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: .28rem .65rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .badge-get  { background: var(--badge-bg-get);  color: var(--get);  border: 1px solid rgba(34,197,94,.3); }
+    .badge-post { background: var(--badge-bg-post); color: var(--post); border: 1px solid rgba(249,115,22,.3); }
+
+    .doc-ep-path {
+      font-family: monospace;
+      font-size: .88rem;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .doc-ep-name {
+      font-size: .78rem;
+      color: var(--muted);
+    }
+
+    .docs-side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .docs-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.3rem 1.5rem;
+    }
+
+    .docs-card h3 {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .7rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .docs-card p, .docs-card li {
+      font-size: .85rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .docs-card ul { padding-left: 1.1rem; }
+    .docs-card li { margin-top: .3rem; }
+
+    .docs-url-chip {
+      display: inline-block;
+      margin-top: .6rem;
+      font-family: monospace;
+      font-size: .8rem;
+      padding: .3rem .7rem;
+      border-radius: 6px;
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.25);
+      color: #a5b4fc;
+    }
+
+    /* ── CI/CD section ── */
+    #cicd { background: var(--surface); }
+
+    .cicd-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (max-width: 700px) { .cicd-layout { grid-template-columns: 1fr; } }
+
+    .pipeline-flow {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .9rem;
+    }
+
+    .pipeline-flow h3 {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .3rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .pipe-step {
+      display: flex;
+      align-items: flex-start;
+      gap: .9rem;
+    }
+
+    .pipe-step .step-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .85rem;
+      flex-shrink: 0;
+    }
+
+    .step-lint { background: rgba(108,99,255,.2); border: 1px solid rgba(108,99,255,.35); }
+    .step-test { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); }
+    .step-build { background: rgba(0,212,170,.12); border: 1px solid rgba(0,212,170,.3); }
+    .step-deploy { background: rgba(255,209,102,.12); border: 1px solid rgba(255,209,102,.3); }
+
+    .pipe-step .step-body { flex: 1; }
+    .pipe-step .step-body .step-title { font-weight: 700; font-size: .88rem; margin-bottom: .2rem; }
+    .pipe-step .step-body .step-desc { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+    .pipe-connector {
+      height: 16px;
+      width: 2px;
+      background: var(--border);
+      margin-left: 15px;
+      border-radius: 1px;
+    }
+
+    .cicd-info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cicd-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .cicd-card h3 {
+      font-size: .9rem;
+      font-weight: 700;
+      margin-bottom: .55rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .cicd-card p, .cicd-card li {
+      font-size: .83rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .cicd-card ul { padding-left: 1.1rem; }
+    .cicd-card li { margin-top: .3rem; }
+
+    .code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .9rem 1.1rem;
+      font-family: 'Courier New', monospace;
+      font-size: .78rem;
+      color: #e2e8f0;
+      overflow-x: auto;
+      line-height: 1.6;
+      margin-top: .6rem;
+    }
+
+    .code-block .cm { color: #6b7280; }
+    .code-block .ck { color: #a5b4fc; }
+    .code-block .cv { color: #fcd34d; }
+    .code-block .cs { color: #6ee7b7; }
+    .code-block .co { color: #f87171; }
+
+    /* ── Tests section ── */
+    #pruebas { background: var(--bg); }
+
+    .tests-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (max-width: 700px) { .tests-layout { grid-template-columns: 1fr; } }
+
+    .test-files-list {
+      display: flex;
+      flex-direction: column;
+      gap: .65rem;
+    }
+
+    .test-file-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .85rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: .9rem;
+    }
+
+    .test-file-card .tf-icon { font-size: 1.1rem; flex-shrink: 0; }
+
+    .test-file-card .tf-name {
+      font-family: monospace;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .test-file-card .tf-tag {
+      font-size: .7rem;
+      padding: .2rem .5rem;
+      border-radius: 5px;
+      background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.25);
+      color: var(--get);
+      white-space: nowrap;
+    }
+
+    .tests-right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .coverage-card {
+      background: linear-gradient(135deg, rgba(34,197,94,.06), rgba(0,212,170,.04));
+      border: 1px solid rgba(34,197,94,.25);
+      border-radius: 12px;
+      padding: 1.3rem 1.5rem;
+    }
+
+    .coverage-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 1rem; }
+
+    .coverage-bar-item { margin-bottom: .7rem; }
+
+    .coverage-bar-item .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: .3rem;
+    }
+
+    .coverage-bar-item .bar-label strong { color: var(--text); }
+
+    .bar-track {
+      width: 100%;
+      height: 6px;
+      background: var(--border);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .error-cases-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+    }
+
+    .error-cases-card h3 { font-size: .9rem; font-weight: 700; margin-bottom: .7rem; display: flex; align-items: center; gap: .5rem; }
+
+    .error-case {
+      display: flex;
+      align-items: flex-start;
+      gap: .75rem;
+      padding: .5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .error-case:last-child { border-bottom: none; }
+
+    .err-code {
+      font-family: monospace;
+      font-size: .82rem;
+      font-weight: 700;
+      padding: .2rem .55rem;
+      border-radius: 5px;
+      background: rgba(255,107,107,.12);
+      border: 1px solid rgba(255,107,107,.25);
+      color: var(--accent3);
+      flex-shrink: 0;
+    }
+
+    .err-desc { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── README section ── */
+    #readme-env { background: var(--surface); }
+
+    .readme-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    @media (max-width: 700px) { .readme-layout { grid-template-columns: 1fr; } }
+
+    .readme-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+    }
+
+    .readme-card h3 {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: .8rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .readme-card ul { padding-left: 1.1rem; }
+
+    .readme-card li {
+      font-size: .84rem;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: .3rem;
+    }
+
+    .readme-card li strong { color: var(--text); }
+
+    .env-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: .5rem;
+    }
+
+    .env-table tr { border-bottom: 1px solid var(--border); }
+    .env-table tr:last-child { border-bottom: none; }
+
+    .env-table td {
+      padding: .45rem .3rem;
+      font-size: .78rem;
+      vertical-align: top;
+    }
+
+    .env-table .env-key {
+      font-family: monospace;
+      color: var(--accent4);
+      font-weight: 600;
+      white-space: nowrap;
+      padding-right: .8rem;
+    }
+
+    .env-table .env-desc { color: var(--muted); line-height: 1.4; }
+
+    .env-table .env-req {
+      white-space: nowrap;
+      font-size: .7rem;
+      font-weight: 700;
+      padding: .15rem .4rem;
+      border-radius: 4px;
+    }
+
+    .req-yes {
+      background: rgba(249,115,22,.12);
+      color: var(--post);
+      border: 1px solid rgba(249,115,22,.25);
+    }
+
+    .req-opt {
+      background: rgba(108,99,255,.1);
+      color: #a5b4fc;
+      border: 1px solid rgba(108,99,255,.2);
+    }
+
+    /* ── Status cards ── */
+    #resumen { background: var(--bg); }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      width: 100%;
+    }
+
+    .status-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .status-card .st-icon { font-size: 2rem; }
+    .status-card .st-label { font-size: .8rem; color: var(--muted); }
+    .status-card .st-val { font-size: 1.4rem; font-weight: 800; }
+    .status-card.done .st-val { color: var(--get); }
+    .status-card.wip .st-val  { color: var(--accent4); }
+
+    .progress-bar {
+      width: 100%;
+      height: 7px;
+      background: var(--border);
+      border-radius: 9999px;
+      overflow: hidden;
+      margin-top: .4rem;
+    }
+
+    .progress-bar .fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    /* ── Footer ── */
+    #fin {
+      background: radial-gradient(ellipse at 40% 60%, #1e1b4b 0%, #0f1117 70%);
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    #fin h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; }
+    #fin h2 span { color: var(--accent2); }
+    #fin p { color: var(--muted); max-width: 520px; }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .8rem;
+    }
+
+    .pill {
+      padding: .45rem 1.1rem;
+      border-radius: 9999px;
+      font-size: .85rem;
+      font-weight: 600;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Nav dots ── */
+    .nav {
+      position: fixed;
+      right: 1.2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      z-index: 100;
+    }
+
+    .nav a {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 1.5px solid var(--muted);
+      display: block;
+      transition: all .2s;
+    }
+
+    .nav a:hover, .nav a.active { background: var(--accent); border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#cover"          title="Portada"></a>
+  <a href="#entregables"    title="Entregables"></a>
+  <a href="#url-cloud"      title="URL Cloud"></a>
+  <a href="#base-datos"     title="Base de Datos"></a>
+  <a href="#documentacion"  title="Documentación"></a>
+  <a href="#cicd"           title="CI/CD"></a>
+  <a href="#pruebas"        title="Pruebas"></a>
+  <a href="#readme-env"     title="README y .env"></a>
+  <a href="#resumen"        title="Resumen"></a>
+  <a href="#fin"            title="Cierre"></a>
+</nav>
+
+<div class="slides">
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 1 — PORTADA
+  ══════════════════════════════════════════ -->
+  <section id="cover">
+    <div class="tag">Mini Marketplace UTEM · Grupo 7</div>
+    <h1>Avance <span>30 junio 2026</span></h1>
+    <p class="subtitle">
+      Entregables y evidencia requerida — Reportería, Batch y Streaming.
+      Servicio analítico sobre FastAPI + Supabase + Google Cloud Pub/Sub.
+    </p>
+    <div class="meta">
+      <div class="meta-item">
+        <span>Fecha</span>
+        <span>30 · 06 · 2026</span>
+      </div>
+      <div class="meta-item">
+        <span>Entregables</span>
+        <span>5 de 5 ✓</span>
+      </div>
+      <div class="meta-item">
+        <span>Plataforma cloud</span>
+        <span>Render.com</span>
+      </div>
+      <div class="meta-item">
+        <span>Puerto</span>
+        <span>:8070</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 2 — ENTREGABLES (tabla resumen)
+  ══════════════════════════════════════════ -->
+  <section id="entregables">
+    <div class="section-header">
+      <div class="eyebrow">Checklist de avance</div>
+      <h2>Entregables requeridos</h2>
+      <div class="divider"></div>
+      <p>Cinco entregables definidos por la pauta. Todos completados al 30-06-26.</p>
+    </div>
+
+    <div class="content">
+      <table class="deliverables-table">
+        <thead>
+          <tr>
+            <th>N°</th>
+            <th>Entregable</th>
+            <th>Formato sugerido</th>
+            <th>Evidencia esperada</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="del-num">1</td>
+            <td class="del-name">URL servicio cloud</td>
+            <td class="del-format">URL</td>
+            <td class="del-evidence">URL pública accesible</td>
+            <td><span class="del-status status-done">✅ Listo</span></td>
+          </tr>
+          <tr>
+            <td class="del-num">2</td>
+            <td class="del-name">Base de datos funcionando</td>
+            <td class="del-format">SQL / NoSQL</td>
+            <td class="del-evidence">Evidencia BD · Schema SQL</td>
+            <td><span class="del-status status-done">✅ Listo</span></td>
+          </tr>
+          <tr>
+            <td class="del-num">3</td>
+            <td class="del-name">Documentación endpoints</td>
+            <td class="del-format">OpenAPI / Markdown</td>
+            <td class="del-evidence">Swagger UI · Insomnia · README</td>
+            <td><span class="del-status status-done">✅ Listo</span></td>
+          </tr>
+          <tr>
+            <td class="del-num">4</td>
+            <td class="del-name">Evidencia CI/CD o deploy</td>
+            <td class="del-format">GitHub Actions · capturas · README</td>
+            <td class="del-evidence">Pipeline o pasos documentados</td>
+            <td><span class="del-status status-done">✅ Listo</span></td>
+          </tr>
+          <tr>
+            <td class="del-num">5</td>
+            <td class="del-name">Pruebas funcionales</td>
+            <td class="del-format">Colección o reporte</td>
+            <td class="del-evidence">Pruebas funcionales · casos de error</td>
+            <td><span class="del-status status-done">✅ Listo</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 3 — ENTREGABLE 1: URL CLOUD
+  ══════════════════════════════════════════ -->
+  <section id="url-cloud">
+    <div class="section-header">
+      <div class="eyebrow">Entregable 1</div>
+      <h2>URL Servicio Cloud</h2>
+      <div class="divider"></div>
+      <p>Servicio desplegado en Render.com. Accesible públicamente sin VPN ni configuración adicional.</p>
+    </div>
+
+    <div class="content">
+      <div class="url-showcase">
+
+        <div class="url-main-card">
+          <div class="url-label">🌐 URL Pública — Producción</div>
+          <div class="url-value">https://g7-reporteria-bash-streaming-dev.onrender.com</div>
+          <div class="url-platform">Render.com · Python 3.11 · FastAPI · Puerto 8070</div>
+        </div>
+
+        <div class="url-endpoints-grid">
+
+          <div class="url-ep-card">
+            <div class="ep-route">GET /health</div>
+            <div class="ep-desc">Liveness probe. Retorna <code>{"status":"ok"}</code> cuando el servicio está activo. Sin headers requeridos.</div>
+          </div>
+
+          <div class="url-ep-card">
+            <div class="ep-route">GET /docs</div>
+            <div class="ep-desc">Swagger UI interactivo generado automáticamente por FastAPI. Permite probar todos los endpoints en el navegador.</div>
+          </div>
+
+          <div class="url-ep-card">
+            <div class="ep-route">GET /redoc</div>
+            <div class="ep-desc">ReDoc — documentación OpenAPI en formato alternativo, más legible para lectura técnica.</div>
+          </div>
+
+          <div class="url-ep-card">
+            <div class="ep-route">GET /openapi.json</div>
+            <div class="ep-desc">Esquema OpenAPI 3.1 en JSON. Importable directamente en Postman, Insomnia u otras herramientas.</div>
+          </div>
+
+        </div>
+
+        <div class="code-block">
+<span class="cm"># Health check de la URL pública</span>
+curl -s https://g7-reporteria-bash-streaming-dev.onrender.com/health
+<span class="cs">→ {"status":"ok"}</span>
+
+<span class="cm"># Endpoint de ventas con headers de correlación</span>
+curl -s https://g7-reporteria-bash-streaming-dev.onrender.com/reports/sales \
+  -H <span class="cs">"X-Request-Id: f47ac10b-58cc-4372-a567-0e02b2c3d479"</span> \
+  -H <span class="cs">"X-Correlation-Id: 550e8400-e29b-41d4-a716-446655440000"</span> \
+  -H <span class="cs">"X-Consumer: bff-grupo1"</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 4 — ENTREGABLE 2: BASE DE DATOS
+  ══════════════════════════════════════════ -->
+  <section id="base-datos">
+    <div class="section-header">
+      <div class="eyebrow">Entregable 2</div>
+      <h2>Base de Datos Funcionando</h2>
+      <div class="divider"></div>
+      <p>Supabase (PostgreSQL) en producción — 5 tablas, 3 migraciones SQL aplicadas.</p>
+    </div>
+
+    <div class="content">
+      <div class="db-layout">
+
+        <div class="db-info-panel">
+
+          <div class="db-badge-card">
+            <h3>🗄️ Motor de Base de Datos</h3>
+            <p><strong style="color:var(--text)">Supabase PostgreSQL</strong> — proyecto en producción. Conexión asíncrona via <strong style="color:var(--text)">SQLAlchemy 2.0 + asyncpg</strong>. URL configurada como variable de entorno <code>DATABASE_URL</code>.</p>
+          </div>
+
+          <div class="db-badge-card" style="border-color:rgba(108,99,255,.3);">
+            <h3>📁 Migraciones SQL</h3>
+            <p>Tres archivos de migración versionados bajo <code>migrations/</code>, ejecutados automáticamente por Docker Compose al iniciar el servicio en desarrollo:</p>
+            <ul style="padding-left:1.1rem; margin-top:.5rem;">
+              <li style="font-size:.82rem; color:var(--muted); margin-top:.3rem;"><code style="color:#a5b4fc">001_initial_schema.sql</code> — tablas de ventas y productos</li>
+              <li style="font-size:.82rem; color:var(--muted); margin-top:.3rem;"><code style="color:#a5b4fc">002_inventory_shortage.sql</code> — log de quiebres de stock</li>
+              <li style="font-size:.82rem; color:var(--muted); margin-top:.3rem;"><code style="color:#a5b4fc">003_batch_jobs.sql</code> — tabla de trabajos batch</li>
+            </ul>
+          </div>
+
+          <div class="db-badge-card" style="border-color:rgba(255,209,102,.25);">
+            <h3>🔗 Conexión ORM</h3>
+            <p>Sesión asíncrona inyectada via <code>get_db()</code> como dependency de FastAPI. Cada petición usa una sesión propia que se cierra al finalizar la respuesta.</p>
+          </div>
+
+        </div>
+
+        <div class="db-tables-panel">
+
+          <div class="table-card">
+            <div class="tname">fact_sales_summary</div>
+            <div class="tfields">
+              <span class="tfield pk">id UUID PK</span>
+              <span class="tfield">period_date</span>
+              <span class="tfield">total_sales_amount</span>
+              <span class="tfield">total_orders_count</span>
+              <span class="tfield">aggregation_type</span>
+              <span class="tfield">updated_at</span>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="tname">agg_top_products</div>
+            <div class="tfields">
+              <span class="tfield pk">product_id VARCHAR PK</span>
+              <span class="tfield">total_units_sold</span>
+              <span class="tfield">total_revenue_generated</span>
+              <span class="tfield">last_calculated_at</span>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="tname">order_status_log</div>
+            <div class="tfields">
+              <span class="tfield pk">id UUID PK</span>
+              <span class="tfield">order_id</span>
+              <span class="tfield">status VARCHAR(50)</span>
+              <span class="tfield">occurred_at</span>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="tname">shipment_delivery_log</div>
+            <div class="tfields">
+              <span class="tfield pk">shipment_id UNIQUE</span>
+              <span class="tfield">order_id</span>
+              <span class="tfield">delivered_at</span>
+              <span class="tfield">delivery_time_minutes</span>
+              <span class="tfield">city</span>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="tname">batch_jobs</div>
+            <div class="tfields">
+              <span class="tfield pk">id UUID PK</span>
+              <span class="tfield">idempotency_key</span>
+              <span class="tfield">status</span>
+              <span class="tfield">created_at</span>
+              <span class="tfield">completed_at</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 5 — ENTREGABLE 3: DOCUMENTACIÓN
+  ══════════════════════════════════════════ -->
+  <section id="documentacion">
+    <div class="section-header">
+      <div class="eyebrow">Entregable 3</div>
+      <h2>Documentación de Endpoints</h2>
+      <div class="divider"></div>
+      <p>OpenAPI 3.1 generado automáticamente · Insomnia Collection · README técnico.</p>
+    </div>
+
+    <div class="content">
+      <div class="docs-layout">
+
+        <div class="docs-endpoint-list">
+
+          <div class="doc-endpoint">
+            <span class="badge badge-get">GET</span>
+            <div>
+              <div class="doc-ep-path">/health</div>
+              <div class="doc-ep-name">Liveness probe</div>
+            </div>
+          </div>
+
+          <div class="doc-endpoint">
+            <span class="badge badge-get">GET</span>
+            <div>
+              <div class="doc-ep-path">/reports/sales</div>
+              <div class="doc-ep-name">Resumen financiero consolidado</div>
+            </div>
+          </div>
+
+          <div class="doc-endpoint">
+            <span class="badge badge-get">GET</span>
+            <div>
+              <div class="doc-ep-path">/reports/orders-by-status</div>
+              <div class="doc-ep-name">Conteo de pedidos por estado</div>
+            </div>
+          </div>
+
+          <div class="doc-endpoint">
+            <span class="badge badge-get">GET</span>
+            <div>
+              <div class="doc-ep-path">/reports/top-products</div>
+              <div class="doc-ep-name">Productos más vendidos (paginado)</div>
+            </div>
+          </div>
+
+          <div class="doc-endpoint">
+            <span class="badge badge-get">GET</span>
+            <div>
+              <div class="doc-ep-path">/reports/average-ticket</div>
+              <div class="doc-ep-name">Ticket promedio de compra (CLP)</div>
+            </div>
+          </div>
+
+          <div class="doc-endpoint">
+            <span class="badge badge-get">GET</span>
+            <div>
+              <div class="doc-ep-path">/reports/peak-hours</div>
+              <div class="doc-ep-name">Franjas horarias con mayor volumen</div>
+            </div>
+          </div>
+
+          <div class="doc-endpoint">
+            <span class="badge badge-get">GET</span>
+            <div>
+              <div class="doc-ep-path">/reports/delivery-performance</div>
+              <div class="doc-ep-name">Lead Time promedio de despacho</div>
+            </div>
+          </div>
+
+          <div class="doc-endpoint">
+            <span class="badge badge-post">POST</span>
+            <div>
+              <div class="doc-ep-path">/reports/batch/recalculate</div>
+              <div class="doc-ep-name">Forzar recálculo batch (202 Accepted)</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="docs-side-panel">
+
+          <div class="docs-card">
+            <h3>📖 Swagger UI</h3>
+            <p>Interfaz interactiva para explorar y probar todos los endpoints directamente desde el navegador. Incluye esquemas de respuesta, parámetros y ejemplos.</p>
+            <a class="docs-url-chip" href="https://g7-reporteria-bash-streaming-dev.onrender.com/docs" target="_blank">…/docs</a>
+            <a class="docs-url-chip" style="margin-left:.5rem" href="https://g7-reporteria-bash-streaming-dev.onrender.com/redoc" target="_blank">…/redoc</a>
+          </div>
+
+          <div class="docs-card">
+            <h3>🧪 Colección Insomnia</h3>
+            <p>Archivo <code>docs/insomnia/grupo7-reporteria.insomnia.json</code> con las 8 peticiones pre-configuradas. Importable en Insomnia v9+ o via REST Client.</p>
+            <ul>
+              <li>Variables de entorno para <code>base_url</code> local y producción</li>
+              <li>Headers de correlación incluidos en cada petición</li>
+              <li>Ejemplos con y sin <code>X-Mock-Http-Status</code></li>
+            </ul>
+          </div>
+
+          <div class="docs-card">
+            <h3>📄 Headers requeridos</h3>
+            <ul>
+              <li><strong>X-Request-Id</strong> — UUID, obligatorio</li>
+              <li><strong>X-Correlation-Id</strong> — UUID, obligatorio</li>
+              <li><strong>X-Consumer</strong> — string, obligatorio</li>
+              <li><strong>Idempotency-Key</strong> — solo en POST batch</li>
+              <li><strong>X-Mock-Http-Status</strong> — solo con USE_MOCKS=true</li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 6 — ENTREGABLE 4: CI/CD
+  ══════════════════════════════════════════ -->
+  <section id="cicd">
+    <div class="section-header">
+      <div class="eyebrow">Entregable 4</div>
+      <h2>Evidencia CI/CD y Deploy</h2>
+      <div class="divider"></div>
+      <p>GitHub Actions ejecuta lint + tests en cada push. Render.com despliega automáticamente desde <code>main</code>.</p>
+    </div>
+
+    <div class="content">
+      <div class="cicd-layout">
+
+        <!-- Pipeline flow -->
+        <div class="pipeline-flow">
+          <h3>⚙️ Pipeline GitHub Actions (<code>ci.yml</code>)</h3>
+
+          <div class="pipe-step">
+            <div class="step-icon step-lint">🔍</div>
+            <div class="step-body">
+              <div class="step-title">Job: lint (ruff)</div>
+              <div class="step-desc">Ejecuta <strong>ruff check</strong> y <strong>ruff format --check</strong> sobre todo el código Python. Falla si hay errores de estilo o imports no usados.</div>
+            </div>
+          </div>
+
+          <div class="pipe-connector"></div>
+
+          <div class="pipe-step">
+            <div class="step-icon step-test">✅</div>
+            <div class="step-body">
+              <div class="step-title">Job: test (pytest) — necesita lint</div>
+              <div class="step-desc">Corre la suite completa con <strong>pytest-asyncio</strong>. Genera reporte JUnit XML y cobertura XML. Umbral mínimo: 60% global, 70% código nuevo.</div>
+            </div>
+          </div>
+
+          <div class="pipe-connector"></div>
+
+          <div class="pipe-step">
+            <div class="step-icon step-build">📦</div>
+            <div class="step-body">
+              <div class="step-title">Artefactos — JUnit + Coverage</div>
+              <div class="step-desc">Publica <code>reports/junit.xml</code> y <code>reports/coverage.xml</code> como artefactos. En PRs publica resumen de cobertura como comentario automático.</div>
+            </div>
+          </div>
+
+          <div class="pipe-connector"></div>
+
+          <div class="pipe-step">
+            <div class="step-icon step-deploy">🚀</div>
+            <div class="step-body">
+              <div class="step-title">Deploy — Render.com (automático)</div>
+              <div class="step-desc">Cada push a <strong>main</strong> dispara el deploy en Render.com via integración nativa con GitHub. Build Docker incluido en el proceso.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="cicd-info-panel">
+
+          <div class="cicd-card">
+            <h3>🐳 Dockerfile</h3>
+            <p>Imagen basada en <code>python:3.11-slim</code>. Instala dependencias desde <code>requirements.txt</code> y arranca con <code>uvicorn</code> en modo producción.</p>
+            <div class="code-block">
+<span class="ck">FROM</span> python:3.11-slim
+<span class="ck">WORKDIR</span> /app
+<span class="ck">COPY</span> requirements.txt .
+<span class="ck">RUN</span> pip install -r requirements.txt
+<span class="ck">COPY</span> . .
+<span class="ck">CMD</span> ["uvicorn", "app.main:app",
+     "--host", "0.0.0.0",
+     "--port", "8070"]
+            </div>
+          </div>
+
+          <div class="cicd-card">
+            <h3>🔀 Triggers del pipeline</h3>
+            <ul>
+              <li>Push a <strong>main</strong> o <strong>develop</strong></li>
+              <li>Pull Request hacia main o develop</li>
+              <li>Excluye cambios solo en <code>docs/**</code></li>
+              <li>Cancela runs anteriores (<strong>concurrency</strong>)</li>
+            </ul>
+          </div>
+
+          <div class="cicd-card">
+            <h3>🧩 Docker Compose local</h3>
+            <ul>
+              <li><strong>postgres</strong> — PostgreSQL 16 Alpine con healthcheck</li>
+              <li><strong>migrate</strong> — Aplica 3 migraciones SQL al iniciar</li>
+              <li><strong>api</strong> — Servicio FastAPI en puerto 8070</li>
+            </ul>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 7 — ENTREGABLE 5: PRUEBAS
+  ══════════════════════════════════════════ -->
+  <section id="pruebas">
+    <div class="section-header">
+      <div class="eyebrow">Entregable 5</div>
+      <h2>Pruebas Funcionales</h2>
+      <div class="divider"></div>
+      <p>Suite con <strong>pytest-asyncio</strong> + <strong>httpx</strong>. 9 módulos de prueba, cobertura ≥ 60%.</p>
+    </div>
+
+    <div class="content">
+      <div class="tests-layout">
+
+        <div class="test-files-list">
+
+          <div class="test-file-card">
+            <div class="tf-icon">🛣️</div>
+            <div class="tf-name">test_routes.py</div>
+            <div class="tf-tag">integración</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">📊</div>
+            <div class="tf-name">test_analytics_service.py</div>
+            <div class="tf-tag">servicio</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">🎭</div>
+            <div class="tf-name">test_analytics_service_mocks.py</div>
+            <div class="tf-tag">mocks</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">🔁</div>
+            <div class="tf-name">test_batch_service.py</div>
+            <div class="tf-tag">batch</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">📨</div>
+            <div class="tf-name">test_pubsub_consumer.py</div>
+            <div class="tf-tag">streaming</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">🧪</div>
+            <div class="tf-name">test_consumer.py</div>
+            <div class="tf-tag">worker</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">🔒</div>
+            <div class="tf-name">test_dependencies.py</div>
+            <div class="tf-tag">headers</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">🎛️</div>
+            <div class="tf-name">test_mock_status_middleware.py</div>
+            <div class="tf-tag">middleware</div>
+          </div>
+
+          <div class="test-file-card">
+            <div class="tf-icon">📦</div>
+            <div class="tf-name">test_mock_data.py</div>
+            <div class="tf-tag">datos</div>
+          </div>
+
+        </div>
+
+        <div class="tests-right-panel">
+
+          <div class="coverage-card">
+            <h3>📈 Cobertura por módulo</h3>
+
+            <div class="coverage-bar-item">
+              <div class="bar-label"><strong>app/api/routes</strong><span>~80%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:80%"></div></div>
+            </div>
+            <div class="coverage-bar-item">
+              <div class="bar-label"><strong>app/middleware</strong><span>~90%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:90%"></div></div>
+            </div>
+            <div class="coverage-bar-item">
+              <div class="bar-label"><strong>app/services</strong><span>~70%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:70%"></div></div>
+            </div>
+            <div class="coverage-bar-item">
+              <div class="bar-label"><strong>app/workers</strong><span>~65%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:65%"></div></div>
+            </div>
+            <div class="coverage-bar-item">
+              <div class="bar-label"><strong>Global</strong><span>≥ 60%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:63%"></div></div>
+            </div>
+          </div>
+
+          <div class="error-cases-card">
+            <h3>⚠️ Casos de error cubiertos</h3>
+
+            <div class="error-case">
+              <span class="err-code">422</span>
+              <div class="err-desc">Headers <strong>X-Request-Id</strong>, <strong>X-Correlation-Id</strong> o <strong>X-Consumer</strong> ausentes o con formato inválido.</div>
+            </div>
+
+            <div class="error-case">
+              <span class="err-code">400</span>
+              <div class="err-desc">UUID inválido en cualquiera de los headers requeridos (validación Pydantic en dependency).</div>
+            </div>
+
+            <div class="error-case">
+              <span class="err-code">409</span>
+              <div class="err-desc"><strong>Idempotency-Key</strong> ya usada: el batch con esa clave ya existe en BD — evita doble ejecución.</div>
+            </div>
+
+            <div class="error-case">
+              <span class="err-code">503</span>
+              <div class="err-desc">Simulado con <strong>X-Mock-Http-Status: 503</strong> para probar resiliencia del BFF sin condición real de fallo.</div>
+            </div>
+
+            <div class="error-case">
+              <span class="err-code">500</span>
+              <div class="err-desc">Error inesperado en handler. El middleware retorna <code>ErrorResponse</code> estándar con timestamp ISO 8601 y correlationId.</div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 8 — README y .env.example
+  ══════════════════════════════════════════ -->
+  <section id="readme-env">
+    <div class="section-header">
+      <div class="eyebrow">Evidencia adicional</div>
+      <h2>README y Configuración</h2>
+      <div class="divider"></div>
+      <p>README con pasos completos de instalación. <code>.env.example</code> con todas las variables documentadas.</p>
+    </div>
+
+    <div class="content">
+      <div class="readme-layout">
+
+        <div class="readme-card">
+          <h3>📄 README.md — Secciones</h3>
+          <ul>
+            <li><strong>Descripción general</strong> — arquitectura y responsabilidad del servicio</li>
+            <li><strong>Stack tecnológico</strong> — tabla completa de dependencias</li>
+            <li><strong>Requisitos previos</strong> — Python 3.11, Docker, Supabase, GCP</li>
+            <li><strong>Instalación local</strong> — pasos con <code>venv</code> y <code>pip</code></li>
+            <li><strong>Docker Compose</strong> — levantamiento en un solo comando</li>
+            <li><strong>Variables de entorno</strong> — tabla con descripción y ejemplo</li>
+            <li><strong>Ejecutar tests</strong> — <code>pytest tests/ -v</code></li>
+            <li><strong>Estructura del proyecto</strong> — árbol de directorios</li>
+            <li><strong>Ejemplos de uso</strong> — <code>curl</code> con URL de producción</li>
+          </ul>
+        </div>
+
+        <div class="readme-card">
+          <h3>🔑 Variables en <code>.env.example</code></h3>
+          <table class="env-table">
+            <tr>
+              <td class="env-key">APP_ENV</td>
+              <td class="env-desc">Entorno: <code>development</code> / <code>production</code></td>
+              <td><span class="env-req req-yes">req</span></td>
+            </tr>
+            <tr>
+              <td class="env-key">SUPABASE_URL</td>
+              <td class="env-desc">URL del proyecto Supabase</td>
+              <td><span class="env-req req-yes">req</span></td>
+            </tr>
+            <tr>
+              <td class="env-key">SUPABASE_PUBLISHABLE_KEY</td>
+              <td class="env-desc">Clave pública (anon key)</td>
+              <td><span class="env-req req-yes">req</span></td>
+            </tr>
+            <tr>
+              <td class="env-key">SUPABASE_SECRET_KEY</td>
+              <td class="env-desc">Clave de servicio (privilegios elevados)</td>
+              <td><span class="env-req req-yes">req</span></td>
+            </tr>
+            <tr>
+              <td class="env-key">DATABASE_URL</td>
+              <td class="env-desc">Cadena asyncpg a PostgreSQL</td>
+              <td><span class="env-req req-yes">req</span></td>
+            </tr>
+            <tr>
+              <td class="env-key">GOOGLE_CLOUD_PROJECT</td>
+              <td class="env-desc">ID del proyecto GCP</td>
+              <td><span class="env-req req-yes">req</span></td>
+            </tr>
+            <tr>
+              <td class="env-key">PUBSUB_SUBSCRIPTION_*</td>
+              <td class="env-desc">4 suscripciones Pub/Sub (order, payment, inventory, shipment)</td>
+              <td><span class="env-req req-yes">req</span></td>
+            </tr>
+            <tr>
+              <td class="env-key">USE_MOCKS</td>
+              <td class="env-desc">Activa middleware de mock HTTP status</td>
+              <td><span class="env-req req-opt">opt</span></td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="readme-card" style="grid-column: 1 / -1;">
+          <h3>🚀 Comandos rápidos de instalación</h3>
+          <div class="code-block" style="margin-top:0">
+<span class="cm"># 1. Clonar el repositorio</span>
+git clone https://github.com/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming.git
+cd Grupo-7-Reporter-a-bash-y-Streaming
+
+<span class="cm"># 2. Copiar variables de entorno y completar valores</span>
+cp .env.example .env
+
+<span class="cm"># 3. Levantar con Docker Compose (incluye PostgreSQL + migraciones + API)</span>
+docker compose up --build
+
+<span class="cm"># 4. Correr tests</span>
+pip install -r requirements.txt &amp;&amp; pytest tests/ -v --asyncio-mode=auto
+
+<span class="cm"># 5. Verificar el servicio</span>
+curl http://localhost:8070/health
+<span class="cs">→ {"status":"ok"}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 9 — RESUMEN DEL AVANCE
+  ══════════════════════════════════════════ -->
+  <section id="resumen">
+    <div class="section-header">
+      <div class="eyebrow">Progreso al 30-06-26</div>
+      <h2>Resumen del avance</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="content">
+      <div class="status-grid">
+
+        <div class="status-card done">
+          <div class="st-icon">🌐</div>
+          <div class="st-val">Render.com</div>
+          <div class="st-label">URL pública activa</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🗄️</div>
+          <div class="st-val">5 tablas</div>
+          <div class="st-label">BD Supabase activa</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">📖</div>
+          <div class="st-val">8 endpoints</div>
+          <div class="st-label">Documentados en Swagger</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">⚙️</div>
+          <div class="st-val">CI/CD</div>
+          <div class="st-label">GitHub Actions activo</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🧪</div>
+          <div class="st-val">9 módulos</div>
+          <div class="st-label">Tests pytest</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">📈</div>
+          <div class="st-val">≥ 60%</div>
+          <div class="st-label">Cobertura de código</div>
+          <div class="progress-bar"><div class="fill" style="width:63%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">📨</div>
+          <div class="st-val">4 eventos</div>
+          <div class="st-label">Pub/Sub streaming</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">🐳</div>
+          <div class="st-val">Docker</div>
+          <div class="st-label">Compose + Dockerfile</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+        <div class="status-card done">
+          <div class="st-icon">📄</div>
+          <div class="st-val">README</div>
+          <div class="st-label">+ .env.example</div>
+          <div class="progress-bar"><div class="fill" style="width:100%"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SLIDE 10 — CIERRE
+  ══════════════════════════════════════════ -->
+  <section id="fin">
+    <div class="tag">Mini Marketplace UTEM · Grupo 7</div>
+    <h2>Todos los entregables<br><span>completados</span></h2>
+    <p>
+      Servicio en producción en Render.com · Swagger en
+      <code style="color:var(--accent)">/docs</code> · Tests con cobertura ≥ 60% ·
+      CI/CD con GitHub Actions · BD Supabase operativa.
+    </p>
+    <div class="pill-list">
+      <span class="pill">FastAPI 0.111+</span>
+      <span class="pill">Python 3.11</span>
+      <span class="pill">Supabase (PostgreSQL)</span>
+      <span class="pill">Google Cloud Pub/Sub</span>
+      <span class="pill">Render.com (deploy)</span>
+      <span class="pill">SQLAlchemy async</span>
+      <span class="pill">Pydantic v2</span>
+      <span class="pill">pytest-asyncio</span>
+      <span class="pill">Ruff</span>
+      <span class="pill">Docker</span>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const sections = document.querySelectorAll('section');
+  const dots     = document.querySelectorAll('.nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        dots.forEach(d => d.classList.remove('active'));
+        const idx = Array.from(sections).indexOf(entry.target);
+        if (dots[idx]) dots[idx].classList.add('active');
+      }
+    });
+  }, { threshold: 0.5 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>

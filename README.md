@@ -57,6 +57,7 @@ de mensajes en el canal de streaming.
 | Framework web | FastAPI 0.111+ |
 | Servidor ASGI | Uvicorn (con extras `standard`) |
 | ORM asincrono | SQLAlchemy 2.0 (asyncio) + asyncpg |
+| Migraciones | Alembic (async) |
 | Base de datos | Supabase Postgres (PostgreSQL) |
 | Almacenamiento de logs | Supabase Storage (bucket `event-logs`) |
 | Streaming de eventos | Google Cloud Pub/Sub |
@@ -128,14 +129,15 @@ Edita `.env` y completa todos los valores:
 
 ### 5. Aplicar el schema de base de datos
 
-Ejecuta el script de migracion inicial en el SQL Editor de Supabase o via `psql`:
+Las migraciones se gestionan con **Alembic**. Para crear todas las tablas desde cero:
 
 ```bash
-psql "$DATABASE_URL" -f migrations/001_initial_schema.sql
+alembic upgrade head
 ```
 
-Este comando crea las tablas `fact_sales_summary`, `agg_top_products`,
-`order_status_log` y `shipment_delivery_log`.
+Alembic lee `DATABASE_URL` desde las variables de entorno (o `.env`) y aplica
+todas las revisiones pendientes en orden. El comando es idempotente: si las tablas
+ya existen y estan al dia, no hace nada.
 
 ### 6. Levantar en modo desarrollo
 
@@ -249,6 +251,11 @@ El worker consume mensajes que siguen el envelope estandar del Mini Marketplace:
 
 ```
 .
+├── alembic/
+│   ├── env.py                    # Configuracion async de Alembic (lee DATABASE_URL del entorno)
+│   ├── script.py.mako            # Plantilla para nuevas revisiones
+│   └── versions/
+│       └── 3da474124121_initial_schema.py   # Migracion inicial
 ├── app/
 │   ├── api/
 │   │   ├── dependencies.py       # Validacion de headers obligatorios
@@ -258,7 +265,7 @@ El worker consume mensajes que siguen el envelope estandar del Mini Marketplace:
 │   ├── db/
 │   │   └── session.py            # Motor asincrono SQLAlchemy + dependencia FastAPI
 │   ├── models/
-│   │   └── analytics.py          # ORM: FactSalesSummary, AggTopProduct
+│   │   └── analytics.py          # ORM: FactSalesSummary, AggTopProduct, BatchJob, etc.
 │   ├── schemas/
 │   │   ├── events.py             # Pydantic: EventEnvelope y payloads por tipo
 │   │   └── responses.py          # Pydantic: respuestas de cada endpoint
@@ -269,8 +276,7 @@ El worker consume mensajes que siguen el envelope estandar del Mini Marketplace:
 │   │   └── pubsub_consumer.py    # Consumidor asincrono de Google Cloud Pub/Sub
 │   ├── config.py                 # Settings via pydantic-settings (carga .env)
 │   └── main.py                   # Instancia FastAPI + lifespan + middlewares
-├── migrations/
-│   └── 001_initial_schema.sql    # Schema inicial de Supabase Postgres
+├── migrations/                   # Archivos SQL legacy (referencia historica, ya no se usan)
 ├── scripts/
 │   └── batch_recalculate.py      # Script CLI para recalculo batch standalone
 ├── tests/
@@ -278,11 +284,97 @@ El worker consume mensajes que siguen el envelope estandar del Mini Marketplace:
 │   └── test_routes.py            # Tests de endpoints HTTP
 ├── docs/
 │   └── Documento de Arquitectura - Grupo 7 (2).docx
+├── alembic.ini                   # Configuracion de Alembic
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
 └── .env.example
 ```
+
+---
+
+## Migraciones de base de datos (Alembic)
+
+El proyecto usa **Alembic** con soporte asyncio para versionar el schema de Postgres.
+Los archivos de migracion viven en `alembic/versions/` y el motor se configura en
+`alembic/env.py`, que toma la `DATABASE_URL` del entorno automaticamente.
+
+### Comandos habituales
+
+#### Aplicar todas las migraciones pendientes
+
+```bash
+alembic upgrade head
+```
+
+#### Ver el estado actual
+
+```bash
+alembic current        # revision aplicada en la BD
+alembic history        # lista completa de revisiones
+```
+
+#### Crear una nueva migracion al cambiar un modelo
+
+Cuando modifiques o agregues campos en `app/models/analytics.py`, crea una nueva
+revision y describe el cambio:
+
+```bash
+alembic revision -m "agregar_columna_region_a_shipment_delivery_log"
+```
+
+Esto genera un archivo en `alembic/versions/`. Edita las funciones `upgrade()` y
+`downgrade()` usando las operaciones de `alembic.op`:
+
+```python
+def upgrade() -> None:
+    op.add_column(
+        "shipment_delivery_log",
+        sa.Column("region", sa.String(length=100), nullable=True),
+    )
+
+def downgrade() -> None:
+    op.drop_column("shipment_delivery_log", "region")
+```
+
+Luego aplica la migracion:
+
+```bash
+alembic upgrade head
+```
+
+#### Revertir la ultima migracion
+
+```bash
+alembic downgrade -1
+```
+
+#### Revertir hasta una revision especifica
+
+```bash
+alembic downgrade <revision_id>   # ej: alembic downgrade 3da474124121
+```
+
+#### Revertir todo (estado vacio)
+
+```bash
+alembic downgrade base
+```
+
+### Estructura de archivos
+
+```
+alembic/
+├── env.py              # Configuracion del entorno async (no modificar salvo cambios de BD)
+├── script.py.mako      # Plantilla para archivos de migracion generados
+└── versions/
+    └── 3da474124121_initial_schema.py   # Migracion inicial (todas las tablas)
+alembic.ini             # Configuracion de Alembic (script_location, logging)
+```
+
+> **Nota sobre Docker Compose:** el servicio `migrate` ejecuta `alembic upgrade head`
+> automaticamente al levantar el stack, antes de que arranque el servicio `api`.
+> No es necesario correr las migraciones manualmente al usar `docker compose up`.
 
 ---
 
