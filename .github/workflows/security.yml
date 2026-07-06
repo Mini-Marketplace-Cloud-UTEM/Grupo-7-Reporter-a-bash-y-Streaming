@@ -1,0 +1,74 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Security — Grupo 7 Reportería, Batch y Streaming
+#
+# bandit: análisis estático (SAST) del código Python; detecta inyecciones,
+#         uso inseguro de funciones criptográficas, subprocess sin sanitizar, etc.
+# pip-audit: escanea las dependencias del proyecto contra la PyPA Advisory
+#            Database para identificar CVEs conocidos en los paquetes instalados.
+#
+# Los steps usan continue-on-error para no bloquear el merge mientras se
+# estabilizan las reglas; el artifact permite revisar los hallazgos off-band.
+#
+# Secrets requeridos: ninguno
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # ── Lunes 08:00 UTC — detecta CVEs nuevos en dependencias ─────────────────
+    - cron: "0 8 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Escaneo de seguridad ─────────────────────────────────────────────────────
+  security:
+    name: Escaneo de seguridad
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v7
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Instalar herramientas de seguridad
+        run: pip install bandit pip-audit
+
+      - name: Crear directorio de reportes
+        run: mkdir -p reports
+
+      # ── bandit — SAST estático ───────────────────────────────────────────────
+      - name: Ejecutar bandit
+        continue-on-error: true
+        run: |
+          bandit -r app/ -ll -f txt
+          bandit -r app/ -ll -f json -o reports/bandit.json
+
+      # ── pip-audit — CVEs en dependencias ────────────────────────────────────
+      - name: Ejecutar pip-audit
+        continue-on-error: true
+        run: pip-audit --requirement requirements.txt
+
+      # ── Artifact ─────────────────────────────────────────────────────────────
+      - name: Subir reporte bandit
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-report
+          path: reports/bandit.json
+          retention-days: 30
