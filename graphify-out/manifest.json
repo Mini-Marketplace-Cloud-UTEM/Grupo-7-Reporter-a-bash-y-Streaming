@@ -1,0 +1,282 @@
+{
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/.claude/settings.json": {
+    "mtime": 1782361854.4509835,
+    "ast_hash": "d5d0d78e9d43eb9a0177f5da2982efe5",
+    "semantic_hash": "d5d0d78e9d43eb9a0177f5da2982efe5"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/.claude/settings.local.json": {
+    "mtime": 1782859714.5565503,
+    "ast_hash": "50e3e9871d114336d8bc82c21c242ea0",
+    "semantic_hash": "50e3e9871d114336d8bc82c21c242ea0"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/alembic/env.py": {
+    "mtime": 1782863720.9997604,
+    "ast_hash": "9044c7f77dbecdb9d3255f88ac30bef1",
+    "semantic_hash": "9044c7f77dbecdb9d3255f88ac30bef1"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/alembic/versions/3da474124121_initial_schema.py": {
+    "mtime": 1782863685.145537,
+    "ast_hash": "df214a6b7ed6f04d124beeda982f0afc",
+    "semantic_hash": "df214a6b7ed6f04d124beeda982f0afc"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/__init__.py": {
+    "mtime": 1782061873.304295,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/api/__init__.py": {
+    "mtime": 1782061873.3043501,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/api/dependencies.py": {
+    "mtime": 1782855978.5785189,
+    "ast_hash": "1b78fd7436e10119feb276460049a519",
+    "semantic_hash": "1b78fd7436e10119feb276460049a519"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/api/routes/__init__.py": {
+    "mtime": 1782061873.3043966,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/api/routes/batch.py": {
+    "mtime": 1782855978.5787988,
+    "ast_hash": "e270e26683a52c46654cd7d8ee01b73c",
+    "semantic_hash": "e270e26683a52c46654cd7d8ee01b73c"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/api/routes/reports.py": {
+    "mtime": 1782855978.5790167,
+    "ast_hash": "1a1250da161bee0b005c6060df0a9639",
+    "semantic_hash": "1a1250da161bee0b005c6060df0a9639"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/config.py": {
+    "mtime": 1782858594.9149246,
+    "ast_hash": "b34cd42f65ef3c37439570f12121ec2a",
+    "semantic_hash": "b34cd42f65ef3c37439570f12121ec2a"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/db/__init__.py": {
+    "mtime": 1782061873.3045413,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/db/session.py": {
+    "mtime": 1782062358.3915813,
+    "ast_hash": "1e89017cf244db1e2d2f4e23564b2c31",
+    "semantic_hash": "1e89017cf244db1e2d2f4e23564b2c31"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/main.py": {
+    "mtime": 1782864756.7801147,
+    "ast_hash": "8993acf111f1a459d9de3ed466becf7b",
+    "semantic_hash": "8993acf111f1a459d9de3ed466becf7b"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/middleware/__init__.py": {
+    "mtime": 1782255545.074765,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/middleware/mock_status.py": {
+    "mtime": 1782258225.3887305,
+    "ast_hash": "f185bbba10f436030c52398cfb71465b",
+    "semantic_hash": "f185bbba10f436030c52398cfb71465b"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/models/__init__.py": {
+    "mtime": 1782061873.304498,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/models/analytics.py": {
+    "mtime": 1782863352.7614033,
+    "ast_hash": "27d9c266c2c9b57fe4648376a3f6f388",
+    "semantic_hash": "27d9c266c2c9b57fe4648376a3f6f388"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/schemas/__init__.py": {
+    "mtime": 1782061873.3044455,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/schemas/events.py": {
+    "mtime": 1782255545.0759187,
+    "ast_hash": "0a73d3a0ba701970fe47c13be61ddbb6",
+    "semantic_hash": "0a73d3a0ba701970fe47c13be61ddbb6"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/schemas/responses.py": {
+    "mtime": 1782255545.0762901,
+    "ast_hash": "b6da5070339c25bf1e269454e1222698",
+    "semantic_hash": "b6da5070339c25bf1e269454e1222698"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/services/__init__.py": {
+    "mtime": 1782061873.304589,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/services/analytics_service.py": {
+    "mtime": 1782863352.7621052,
+    "ast_hash": "4f274ee42a92259dd501b62c842b8190",
+    "semantic_hash": "4f274ee42a92259dd501b62c842b8190"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/services/batch_service.py": {
+    "mtime": 1782858594.9153376,
+    "ast_hash": "4c2b685160211961b69a5529425a11bd",
+    "semantic_hash": "4c2b685160211961b69a5529425a11bd"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/services/mock_data.py": {
+    "mtime": 1782361854.4525127,
+    "ast_hash": "bfabe296d7085163e4e2e454a0094366",
+    "semantic_hash": "bfabe296d7085163e4e2e454a0094366"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/workers/__init__.py": {
+    "mtime": 1782061873.30464,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/app/workers/pubsub_consumer.py": {
+    "mtime": 1782863352.762598,
+    "ast_hash": "dbdeb1d5f402149e4e34a9f9cb856e8c",
+    "semantic_hash": "dbdeb1d5f402149e4e34a9f9cb856e8c"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/rest/grupo7-reporteria.insomnia.json": {
+    "mtime": 1782258408.2817822,
+    "ast_hash": "dd075f9f89b9abef823dfb3d7bfb94f0",
+    "semantic_hash": "dd075f9f89b9abef823dfb3d7bfb94f0"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/migrations/001_initial_schema.sql": {
+    "mtime": 1782062006.0653076,
+    "ast_hash": "f4ebe327cf1c496f849a5d331666d860",
+    "semantic_hash": "f4ebe327cf1c496f849a5d331666d860"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/migrations/003_batch_jobs.sql": {
+    "mtime": 1782855978.5799356,
+    "ast_hash": "d59296790d1a47c97cbc2c38275dfcd7",
+    "semantic_hash": "d59296790d1a47c97cbc2c38275dfcd7"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/scripts/batch_recalculate.py": {
+    "mtime": 1782855978.58014,
+    "ast_hash": "507c0e6bf18a5274f28c0f8b4cb098f2",
+    "semantic_hash": "507c0e6bf18a5274f28c0f8b4cb098f2"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/scripts/hooks/install.sh": {
+    "mtime": 1782361854.4529502,
+    "ast_hash": "f518192b0b5cae8b64c909bc62fb73e7",
+    "semantic_hash": "f518192b0b5cae8b64c909bc62fb73e7"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/scripts/hooks/post-commit": {
+    "mtime": 1782361854.4532661,
+    "ast_hash": "c8f1cf42c41c15e3b8f4b5d6756ef617",
+    "semantic_hash": "c8f1cf42c41c15e3b8f4b5d6756ef617"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/__init__.py": {
+    "mtime": 1782061873.3046863,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_analytics_service.py": {
+    "mtime": 1782863352.7638602,
+    "ast_hash": "16d25668b4fb4dbac0754d6d3063d56b",
+    "semantic_hash": "16d25668b4fb4dbac0754d6d3063d56b"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_analytics_service_mocks.py": {
+    "mtime": 1782361854.4540365,
+    "ast_hash": "00336f88dc4ffa3cf5016e7d5fd22e32",
+    "semantic_hash": "00336f88dc4ffa3cf5016e7d5fd22e32"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_batch_service.py": {
+    "mtime": 1782255545.083091,
+    "ast_hash": "dc35bd2a5b268aad123d239048c71a97",
+    "semantic_hash": "dc35bd2a5b268aad123d239048c71a97"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_consumer.py": {
+    "mtime": 1782255545.0839236,
+    "ast_hash": "a1d19e198542b180b7d838134ac7228d",
+    "semantic_hash": "a1d19e198542b180b7d838134ac7228d"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_dependencies.py": {
+    "mtime": 1782361854.4542942,
+    "ast_hash": "8006dbf9cbc4d960a0dcf583bfdfcc90",
+    "semantic_hash": "8006dbf9cbc4d960a0dcf583bfdfcc90"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_mock_data.py": {
+    "mtime": 1782361854.4545684,
+    "ast_hash": "f44abce70ba2d0b8604e1288c60cbb95",
+    "semantic_hash": "f44abce70ba2d0b8604e1288c60cbb95"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_mock_status_middleware.py": {
+    "mtime": 1782258243.971482,
+    "ast_hash": "939a860a3d7b6e3fe2e0c8c612db03f6",
+    "semantic_hash": "939a860a3d7b6e3fe2e0c8c612db03f6"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_pubsub_consumer.py": {
+    "mtime": 1782863352.7645037,
+    "ast_hash": "2afc320ebc486ce343a589bf0fb382fe",
+    "semantic_hash": "2afc320ebc486ce343a589bf0fb382fe"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/tests/test_routes.py": {
+    "mtime": 1782855978.5804617,
+    "ast_hash": "d58410104980ad9bc5c976d31af94f2a",
+    "semantic_hash": "d58410104980ad9bc5c976d31af94f2a"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/.claude/skills/lint-fix/SKILL.md": {
+    "mtime": 1782361854.4514072,
+    "ast_hash": "ffd06d7f262019f3a057ae152f13b8f1",
+    "semantic_hash": "ffd06d7f262019f3a057ae152f13b8f1"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/.github/workflows/ci.yml": {
+    "mtime": 1782364056.8082607,
+    "ast_hash": "76d0ed64a1aaf872679b3bfb16b5fdac",
+    "semantic_hash": "76d0ed64a1aaf872679b3bfb16b5fdac"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/README.md": {
+    "mtime": 1782864666.8881493,
+    "ast_hash": "7426c7ecc15dd2e6e13dd5a1a6185ac6",
+    "semantic_hash": "7426c7ecc15dd2e6e13dd5a1a6185ac6"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docker-compose.yml": {
+    "mtime": 1782863691.9587486,
+    "ast_hash": "09302b5dac9c628255adf3997a1da247",
+    "semantic_hash": "09302b5dac9c628255adf3997a1da247"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/avances/avance-3.md": {
+    "mtime": 1782364056.808596,
+    "ast_hash": "cccf808995c5486a73a3b943370808b5",
+    "semantic_hash": "cccf808995c5486a73a3b943370808b5"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/avances/avance-4.md": {
+    "mtime": 1783362967.2875876,
+    "ast_hash": "0ad6998947db83d23a312fe6eb62f382",
+    "semantic_hash": "0ad6998947db83d23a312fe6eb62f382"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/avances/proxima-tarea.md": {
+    "mtime": 1783362732.5989175,
+    "ast_hash": "3fae58e6dc457d7a3feb75d72a250475",
+    "semantic_hash": "3fae58e6dc457d7a3feb75d72a250475"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/openapi-mocks.md": {
+    "mtime": 1782258288.1303797,
+    "ast_hash": "daed594798e3206249420c4eda0eb98b",
+    "semantic_hash": "daed594798e3206249420c4eda0eb98b"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/presentaciones/avances-23-06-26.html": {
+    "mtime": 1782255545.0801919,
+    "ast_hash": "0aa73226c8c6ce5fdf878b35d877af0e",
+    "semantic_hash": "0aa73226c8c6ce5fdf878b35d877af0e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/presentaciones/avances-30-06-26.html": {
+    "mtime": 1782864756.79901,
+    "ast_hash": "da346b2f8e7c86d3bea2e26dc3777ced",
+    "semantic_hash": "da346b2f8e7c86d3bea2e26dc3777ced"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/docs/security/audit-2026-06-21.md": {
+    "mtime": 1782255545.0806508,
+    "ast_hash": "6f5e81079b589f0aa769237ebbdcad17",
+    "semantic_hash": "6f5e81079b589f0aa769237ebbdcad17"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/requirements-dev.txt": {
+    "mtime": 1782255545.081818,
+    "ast_hash": "b41ab5b949fad93be4dea322d438829e",
+    "semantic_hash": "b41ab5b949fad93be4dea322d438829e"
+  },
+  "/Users/fran/Development/Mini-Marketplace-Cloud-UTEM/Grupo-7-Reporter-a-bash-y-Streaming/requirements.txt": {
+    "mtime": 1782863808.9426234,
+    "ast_hash": "3c607b3ea9e2f70098f8015d312bf83c",
+    "semantic_hash": "3c607b3ea9e2f70098f8015d312bf83c"
+  }
+}
