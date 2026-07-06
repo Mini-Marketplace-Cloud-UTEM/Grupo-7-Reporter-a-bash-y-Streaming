@@ -63,7 +63,7 @@ jobs:
           requirements-path: "requirements.txt"
 
       - name: Subir resultados SARIF a GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         # Se ejecuta siempre para que los hallazgos queden registrados
         # incluso si el step anterior encontró problemas.
         if: always()
