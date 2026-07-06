@@ -39,6 +39,10 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "alembic"
         update-types: ["version-update:semver-major"]
+      # pydantic-core es una dep transitiva de pydantic con versión exacta fijada
+      # por pydantic mismo — solo actualizar manualmente junto con pydantic.
+      - dependency-name: "pydantic-core"
+        update-types: ["version-update:semver-patch", "version-update:semver-minor", "version-update:semver-major"]
 
   # ── GitHub Actions ───────────────────────────────────────────────────────────
   - package-ecosystem: "github-actions"
