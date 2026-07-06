@@ -17,7 +17,7 @@
       "parentId": "wrk_grupo7",
       "name": "Base (localhost — Mock activo)",
       "data": {
-        "base_url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app",
+        "base_url": "https://g7-reporteria-bash-streaming-dev.onrender.com",
         "request_id": "00000000-0000-0000-0000-000000000001",
         "correlation_id": "00000000-0000-0000-0000-000000000002",
         "consumer": "bff-grupo1",
@@ -409,7 +409,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/sales",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/sales",
       "body": "ewogICJwZXJpb2QiOiB7CiAgICAiZnJvbSI6IG51bGwsCiAgICAidG8iOiBudWxsCiAgfSwKICAidG90YWxTYWxlcyI6IDg3MzIwMDAwLAogICJ0b3RhbE9yZGVycyI6IDExNDgsCiAgImN1cnJlbmN5IjogIkNMUCIKfQ==",
       "bytesRead": 124,
       "bytesContent": 124,
@@ -451,7 +451,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/sales?from=2025-01-01&to=2025-12-31",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/sales?from=2025-01-01&to=2025-12-31",
       "body": "ewogICJwZXJpb2QiOiB7CiAgICAiZnJvbSI6ICIyMDI1LTAxLTAxIiwKICAgICJ0byI6ICIyMDI1LTEyLTMxIgogIH0sCiAgInRvdGFsU2FsZXMiOiAyNDg1MDAwMCwKICAidG90YWxPcmRlcnMiOiAzMTIsCiAgImN1cnJlbmN5IjogIkNMUCIKfQ==",
       "bytesRead": 139,
       "bytesContent": 139,
@@ -490,7 +490,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/orders-by-status",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/orders-by-status",
       "body": "WwogIHsKICAgICJzdGF0dXMiOiAiREVMSVZFUkVEIiwKICAgICJjb3VudCI6IDE5OAogIH0sCiAgewogICAgInN0YXR1cyI6ICJDT05GSVJNRUQiLAogICAgImNvdW50IjogNjcKICB9LAogIHsKICAgICJzdGF0dXMiOiAiUEVORElORyIsCiAgICAiY291bnQiOiAzMQogIH0sCiAgewogICAgInN0YXR1cyI6ICJDQU5DRUxMRUQiLAogICAgImNvdW50IjogMTIKICB9LAogIHsKICAgICJzdGF0dXMiOiAiU0hJUFBFRCIsCiAgICAiY291bnQiOiA0CiAgfQpd",
       "bytesRead": 258,
       "bytesContent": 258,
@@ -532,7 +532,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/top-products?page=1&pageSize=10",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/top-products?page=1&pageSize=10",
       "body": "ewogICJkYXRhIjogWwogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMTAwIiwKICAgICAgIm5hbWUiOiAiTm90ZWJvb2sgTGVub3ZvIElkZWFQYWQiLAogICAgICAidW5pdHNTb2xkIjogODUsCiAgICAgICJyZXZlbnVlIjogNDI1MDAwMAogICAgfSwKICAgIHsKICAgICAgInByb2R1Y3RJZCI6ICJQLTA0MiIsCiAgICAgICJuYW1lIjogIk1vdXNlIEluYWzDoW1icmljbyBMb2dpdGVjaCIsCiAgICAgICJ1bml0c1NvbGQiOiA3NCwKICAgICAgInJldmVudWUiOiA4ODgwMDAKICAgIH0sCiAgICB7CiAgICAgICJwcm9kdWN0SWQiOiAiUC0yMDciLAogICAgICAibmFtZSI6ICJBdWTDrWZvbm9zIFNvbnkgV0gtMTAwMFhNNSIsCiAgICAgICJ1bml0c1NvbGQiOiA2MSwKICAgICAgInJldmVudWUiOiAzMDUwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMzE4IiwKICAgICAgIm5hbWUiOiAiVGVjbGFkbyBNZWPDoW5pY28gUmVkcmFnb24iLAogICAgICAidW5pdHNTb2xkIjogNTgsCiAgICAgICJyZXZlbnVlIjogMTE2MDAwMAogICAgfSwKICAgIHsKICAgICAgInByb2R1Y3RJZCI6ICJQLTA1NSIsCiAgICAgICJuYW1lIjogIk1vbml0b3IgU2Ftc3VuZyAyNyBwdWxnYWRhcyIsCiAgICAgICJ1bml0c1NvbGQiOiA1MiwKICAgICAgInJldmVudWUiOiA1MjAwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtNDExIiwKICAgICAgIm5hbWUiOiAiU2lsbGEgR2FtZXIgRFhSYWNlciIsCiAgICAgICJ1bml0c1NvbGQiOiA0OSwKICAgICAgInJldmVudWUiOiA0OTAwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMTIzIiwKICAgICAgIm5hbWUiOiAiV2ViY2FtIExvZ2l0ZWNoIEM5MjAiLAogICAgICAidW5pdHNTb2xkIjogNDMsCiAgICAgICJyZXZlbnVlIjogODYwMDAwCiAgICB9LAogICAgewogICAgICAicHJvZHVjdElkIjogIlAtMjk5IiwKICAgICAgIm5hbWUiOiAiRGlzY28gU1NEIFNhbXN1bmcgMVRCIiwKICAgICAgInVuaXRzU29sZCI6IDM4LAogICAgICAicmV2ZW51ZSI6IDE1MjAwMDAKICAgIH0sCiAgICB7CiAgICAgICJwcm9kdWN0SWQiOiAiUC0wNzciLAogICAgICAibmFtZSI6ICJQYXJsYW50ZSBCbHVldG9vdGggSkJMIEZsaXAgNiIsCiAgICAgICJ1bml0c1NvbGQiOiAzNSwKICAgICAgInJldmVudWUiOiA3MDAwMDAKICAgIH0sCiAgICB7CiAgICAgICJwcm9kdWN0SWQiOiAiUC01MDEiLAogICAgICAibmFtZSI6ICJIdWIgVVNCLUMgNyBlbiAxIEFua2VyIiwKICAgICAgInVuaXRzU29sZCI6IDI5LAogICAgICAicmV2ZW51ZSI6IDU4MDAwMAogICAgfQogIF0sCiAgInBhZ2luYXRpb24iOiB7CiAgICAidG90YWxJdGVtcyI6IDQ3LAogICAgInRvdGFsUGFnZXMiOiA1LAogICAgImN1cnJlbnRQYWdlIjogMSwKICAgICJwYWdlU2l6ZSI6IDEwCiAgfQp9",
       "bytesRead": 1431,
       "bytesContent": 1431,
@@ -571,7 +571,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/average-ticket",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/average-ticket",
       "body": "ewogICJhdmVyYWdlVGlja2V0IjogNzk2NDcsCiAgImN1cnJlbmN5IjogIkNMUCIKfQ==",
       "bytesRead": 49,
       "bytesContent": 49,
@@ -610,7 +610,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/peak-hours",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/peak-hours",
       "body": "WwogIHsKICAgICJob3VyIjogMCwKICAgICJvcmRlckNvdW50IjogNAogIH0sCiAgewogICAgImhvdXIiOiAxLAogICAgIm9yZGVyQ291bnQiOiAyCiAgfSwKICB7CiAgICAiaG91ciI6IDIsCiAgICAib3JkZXJDb3VudCI6IDEKICB9LAogIHsKICAgICJob3VyIjogMywKICAgICJvcmRlckNvdW50IjogMAogIH0sCiAgewogICAgImhvdXIiOiA0LAogICAgIm9yZGVyQ291bnQiOiAwCiAgfSwKICB7CiAgICAiaG91ciI6IDUsCiAgICAib3JkZXJDb3VudCI6IDEKICB9LAogIHsKICAgICJob3VyIjogNiwKICAgICJvcmRlckNvdW50IjogMwogIH0sCiAgewogICAgImhvdXIiOiA3LAogICAgIm9yZGVyQ291bnQiOiA4CiAgfSwKICB7CiAgICAiaG91ciI6IDgsCiAgICAib3JkZXJDb3VudCI6IDE0CiAgfSwKICB7CiAgICAiaG91ciI6IDksCiAgICAib3JkZXJDb3VudCI6IDIxCiAgfSwKICB7CiAgICAiaG91ciI6IDEwLAogICAgIm9yZGVyQ291bnQiOiAyNwogIH0sCiAgewogICAgImhvdXIiOiAxMSwKICAgICJvcmRlckNvdW50IjogMzUKICB9LAogIHsKICAgICJob3VyIjogMTIsCiAgICAib3JkZXJDb3VudCI6IDQ4CiAgfSwKICB7CiAgICAiaG91ciI6IDEzLAogICAgIm9yZGVyQ291bnQiOiA1MgogIH0sCiAgewogICAgImhvdXIiOiAxNCwKICAgICJvcmRlckNvdW50IjogNDQKICB9LAogIHsKICAgICJob3VyIjogMTUsCiAgICAib3JkZXJDb3VudCI6IDM4CiAgfSwKICB7CiAgICAiaG91ciI6IDE2LAogICAgIm9yZGVyQ291bnQiOiAzMQogIH0sCiAgewogICAgImhvdXIiOiAxNywKICAgICJvcmRlckNvdW50IjogMjkKICB9LAogIHsKICAgICJob3VyIjogMTgsCiAgICAib3JkZXJDb3VudCI6IDYzCiAgfSwKICB7CiAgICAiaG91ciI6IDE5LAogICAgIm9yZGVyQ291bnQiOiA3MQogIH0sCiAgewogICAgImhvdXIiOiAyMCwKICAgICJvcmRlckNvdW50IjogNTgKICB9LAogIHsKICAgICJob3VyIjogMjEsCiAgICAib3JkZXJDb3VudCI6IDQxCiAgfSwKICB7CiAgICAiaG91ciI6IDIyLAogICAgIm9yZGVyQ291bnQiOiAyMgogIH0sCiAgewogICAgImhvdXIiOiAyMywKICAgICJvcmRlckNvdW50IjogMTEKICB9Cl0=",
       "bytesRead": 1088,
       "bytesContent": 1088,
@@ -649,7 +649,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/delivery-performance",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/delivery-performance",
       "body": "ewogICJhdmdEZWxpdmVyeVRpbWVNaW51dGVzIjogMTM4LAogICJ0b3RhbERlbGl2ZXJlZENvdW50IjogMTk4Cn0=",
       "bytesRead": 65,
       "bytesContent": 65,
@@ -692,7 +692,7 @@
         { "name": "Content-Type", "value": "application/json" }
       ],
       "contentType": "application/json",
-      "url": "https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/batch/recalculate",
+      "url": "https://g7-reporteria-bash-streaming-dev.onrender.com/reports/batch/recalculate",
       "body": "ewogICJqb2JJZCI6ICI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwOTkiLAogICJzdGF0dXMiOiAiUVVFVUVEIgp9",
       "bytesRead": 75,
       "bytesContent": 75,

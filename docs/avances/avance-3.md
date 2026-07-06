@@ -173,13 +173,13 @@ async def inject_request_id(request: Request, call_next):
 
 ### Contexto técnico
 
-El servicio se despliega en Railway. El `Dockerfile` y `docker-compose.yml` están en la raíz. Las variables de entorno se declaran en `.env.example`.
+El servicio se despliega en Render. El `Dockerfile` y `docker-compose.yml` están en la raíz. Las variables de entorno se declaran en `.env.example`.
 
 ### Tareas
 
-#### 3.1 Configurar variables de entorno en Railway (producción)
+#### 3.1 Configurar variables de entorno en Render (producción)
 
-Las siguientes variables deben estar configuradas en el panel de Railway (no en el repositorio):
+Las siguientes variables deben estar configuradas en el panel de Render (no en el repositorio):
 
 | Variable | Descripción |
 |---|---|
@@ -197,16 +197,16 @@ Las siguientes variables deben estar configuradas en el panel de Railway (no en 
 
 La variable `GOOGLE_APPLICATION_CREDENTIALS` debe apuntar al archivo de service account JSON montado en el contenedor, o configurar Workload Identity en GCP para evitar archivos de credenciales.
 
-#### 3.2 Verificar healthcheck en Railway
+#### 3.2 Verificar healthcheck en Render
 
-Railway detecta el healthcheck automáticamente si el servicio responde `200` en `GET /health`. Confirmar que el `Dockerfile` expone el puerto correcto:
+Render detecta el healthcheck automáticamente si el servicio responde `200` en `GET /health`. Confirmar que el `Dockerfile` expone el puerto correcto:
 
 ```dockerfile
 EXPOSE 8070
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8070"]
 ```
 
-En Railway, configurar:
+En Render, configurar:
 - **Health check path:** `/health`
 - **Health check timeout:** `30s`
 - **Restart policy:** `on-failure`
@@ -218,7 +218,7 @@ Verificar que el workflow de CI ejecute en orden:
 2. `ruff format --check` (formato)
 3. `pytest` con cobertura
 
-El paso de despliegue a Railway debe ejecutarse **solo en push a `main`** y **solo si CI pasa**.
+El paso de despliegue a Render debe ejecutarse **solo en push a `main`** y **solo si CI pasa**.
 
 Plantilla de job de despliegue (`.github/workflows/deploy.yml`):
 ```yaml
@@ -228,10 +228,10 @@ deploy:
   if: github.ref == 'refs/heads/main'
   steps:
     - uses: actions/checkout@v4
-    - name: Deploy to Railway
-      run: npx @railway/cli@latest up --service grupo-7-reporteria
+    - name: Deploy to Render
+      run: render deploy --service-id $RENDER_SERVICE_ID
       env:
-        RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
 ```
 
 #### 3.4 Ejecutar migraciones pendientes en Supabase
@@ -250,7 +250,7 @@ ORDER BY table_name;
 
 #### 3.5 Configurar Docker Compose para desarrollo local
 
-El `docker-compose.yml` debe permitir levantar el servicio localmente sin Railway. Verificar que:
+El `docker-compose.yml` debe permitir levantar el servicio localmente sin Render. Verificar que:
 - El servicio `postgres` esté configurado con las variables de `POSTGRES_*` del `.env.example`.
 - La variable `DATABASE_URL` use `postgres` como hostname (nombre del servicio en Compose), no `localhost`.
 - Exista un servicio `pubsub-emulator` o instrucciones claras para emular Pub/Sub localmente usando la variable de entorno `PUBSUB_EMULATOR_HOST`.
@@ -291,7 +291,7 @@ Solicitar al Grupo 1 el esquema de requests que enviarán. Verificar punto a pun
 
 Enviarles la URL de documentación OpenAPI del servicio en producción:
 ```
-https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/docs
+https://g7-reporteria-bash-streaming-dev.onrender.com/docs
 ```
 
 Incluir en el correo/mensaje:
@@ -311,7 +311,7 @@ Para cada grupo, confirmar el esquema JSON exacto que publican en Pub/Sub. Compa
 
 El `EventEnvelope` espera siempre: `eventId`, `eventType`, `version`, `occurredAt`, `producer`, `correlationId`, `payload`.
 
-Pedir a los grupos upstream que publiquen un evento de prueba en el tópico y verificar que el worker lo procese sin errores revisando los logs en Railway.
+Pedir a los grupos upstream que publiquen un evento de prueba en el tópico y verificar que el worker lo procese sin errores revisando los logs en Render.
 
 #### 4.4 Completar README final
 
@@ -323,7 +323,7 @@ El `README.md` debe incluir:
 5. **Endpoints** — tabla con método, ruta, headers requeridos y descripción breve.
 6. **Sistema de mocks** — cómo activarlo y usarlo (ya documentado en `app/main.py`, trasladar al README).
 7. **Ejecutar tests** — comando `pytest` con flags de cobertura.
-8. **Despliegue** — URL de producción en Railway.
+8. **Despliegue** — URL de producción en Render.
 
 ---
 
@@ -374,7 +374,7 @@ Comando de verificación manual:
 
 ```bash
 # 1. Consultar ventas antes del evento
-curl -s https://grupo-7-reporter-a-bash-y-streaming-production.up.railway.app/reports/sales \
+curl -s https://g7-reporteria-bash-streaming-dev.onrender.com/reports/sales \
   -H "X-Request-Id: $(uuidgen)" \
   -H "X-Correlation-Id: $(uuidgen)" \
   -H "X-Consumer: qa-verificacion"
