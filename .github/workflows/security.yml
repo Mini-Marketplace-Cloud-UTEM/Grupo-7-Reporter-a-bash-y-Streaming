@@ -7,7 +7,7 @@
 #            Database para identificar CVEs conocidos en los paquetes instalados.
 #
 # Los steps usan continue-on-error para no bloquear el merge mientras se
-# estabilizan las reglas; el artifact permite revisar los hallazgos off-band.
+# estabilizan las reglas; el resumen se publica en la pestaña Summary del job.
 #
 # Secrets requeridos: ninguno
 # ──────────────────────────────────────────────────────────────────────────────
@@ -39,10 +39,10 @@ jobs:
 
     steps:
       - name: Checkout código
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Configurar Python 3.11
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -62,13 +62,67 @@ jobs:
       # ── pip-audit — CVEs en dependencias ────────────────────────────────────
       - name: Ejecutar pip-audit
         continue-on-error: true
-        run: pip-audit --requirement requirements.txt
+        run: |
+          pip-audit --requirement requirements.txt --format markdown \
+            > reports/pip-audit.md 2>&1 || true
+          cat reports/pip-audit.md
+
+      # ── Resumen en GitHub Actions Summary ───────────────────────────────────
+      - name: Publicar resumen de seguridad
+        if: always()
+        run: |
+          python3 << 'EOF'
+          import json, os
+
+          out = open(os.environ["GITHUB_STEP_SUMMARY"], "a")
+
+          # ── Bandit ──────────────────────────────────────────────────────────
+          out.write("## 🔒 Bandit — Análisis estático\n\n")
+          try:
+              with open("reports/bandit.json") as f:
+                  data = json.load(f)
+              results = data.get("results", [])
+              metrics = data.get("metrics", {}).get("_totals", {})
+              if not results:
+                  out.write("✅ Sin hallazgos.\n\n")
+              else:
+                  high   = metrics.get("SEVERITY.HIGH", 0)
+                  medium = metrics.get("SEVERITY.MEDIUM", 0)
+                  low    = metrics.get("SEVERITY.LOW", 0)
+                  out.write(f"**{len(results)} hallazgo(s)** — 🔴 High: {high} | 🟡 Medium: {medium} | 🔵 Low: {low}\n\n")
+                  out.write("| Severidad | Confianza | Archivo | Línea | Descripción |\n")
+                  out.write("|-----------|-----------|---------|-------|-------------|\n")
+                  for r in results:
+                      sev  = r["issue_severity"]
+                      icon = "🔴" if sev == "HIGH" else ("🟡" if sev == "MEDIUM" else "🔵")
+                      out.write(
+                          f"| {icon} {sev} | {r['issue_confidence']} "
+                          f"| `{r['filename']}` | {r['line_number']} "
+                          f"| {r['issue_text']} |\n"
+                      )
+                  out.write("\n")
+          except FileNotFoundError:
+              out.write("⚠️ Reporte no generado (bandit no pudo ejecutarse).\n\n")
+
+          # ── pip-audit ───────────────────────────────────────────────────────
+          out.write("## 📦 pip-audit — CVEs en dependencias\n\n")
+          try:
+              content = open("reports/pip-audit.md").read().strip()
+              if not content or "No known vulnerabilities found" in content:
+                  out.write("✅ Sin vulnerabilidades conocidas.\n\n")
+              else:
+                  out.write(content + "\n\n")
+          except FileNotFoundError:
+              out.write("⚠️ Reporte no generado (pip-audit no pudo ejecutarse).\n\n")
+
+          out.close()
+          EOF
 
       # ── Artifact ─────────────────────────────────────────────────────────────
-      - name: Subir reporte bandit
+      - name: Subir reportes
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: bandit-report
-          path: reports/bandit.json
+          name: security-reports
+          path: reports/
           retention-days: 30
