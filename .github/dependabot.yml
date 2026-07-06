@@ -1,0 +1,60 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Dependabot — Grupo 7 Reportería, Batch y Streaming
+#
+# Revisa actualizaciones de dependencias pip y de las GitHub Actions usadas
+# en los workflows, abriendo PRs automáticos cada semana.
+# ──────────────────────────────────────────────────────────────────────────────
+
+version: 2
+
+updates:
+  # ── Dependencias Python (pip) ────────────────────────────────────────────────
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Santiago"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "chore(deps)"
+    # Agrupa todas las actualizaciones de producción en un solo PR para
+    # reducir el ruido; las de desarrollo van separadas.
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
+    ignore:
+      # Ignorar saltos de versión mayor — revisar manualmente
+      - dependency-name: "fastapi"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "sqlalchemy"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "pydantic"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "alembic"
+        update-types: ["version-update:semver-major"]
+
+  # ── GitHub Actions ───────────────────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Santiago"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
