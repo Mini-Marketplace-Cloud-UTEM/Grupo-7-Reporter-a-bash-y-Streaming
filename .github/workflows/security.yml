@@ -57,7 +57,7 @@ jobs:
       - name: Ejecutar análisis Pysa
         # facebook/pysa-action instala Pyre + Pysa, ejecuta el análisis
         # y emite un archivo sarif.json con los hallazgos.
-        uses: facebook/pysa-action@v0.0.1
+        uses: facebook/pysa-action@0.0.1
         with:
           repo-directory: "./app"
           requirements-path: "requirements.txt"
