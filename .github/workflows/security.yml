@@ -1,0 +1,128 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Security — Grupo 7 Reportería, Batch y Streaming
+#
+# bandit: análisis estático (SAST) del código Python; detecta inyecciones,
+#         uso inseguro de funciones criptográficas, subprocess sin sanitizar, etc.
+# pip-audit: escanea las dependencias del proyecto contra la PyPA Advisory
+#            Database para identificar CVEs conocidos en los paquetes instalados.
+#
+# Los steps usan continue-on-error para no bloquear el merge mientras se
+# estabilizan las reglas; el resumen se publica en la pestaña Summary del job.
+#
+# Secrets requeridos: ninguno
+# ──────────────────────────────────────────────────────────────────────────────
+
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # ── Lunes 08:00 UTC — detecta CVEs nuevos en dependencias ─────────────────
+    - cron: "0 8 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── Escaneo de seguridad ─────────────────────────────────────────────────────
+  security:
+    name: Escaneo de seguridad
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v7
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Instalar herramientas de seguridad
+        run: pip install bandit pip-audit
+
+      - name: Crear directorio de reportes
+        run: mkdir -p reports
+
+      # ── bandit — SAST estático ───────────────────────────────────────────────
+      - name: Ejecutar bandit
+        continue-on-error: true
+        run: |
+          bandit -r app/ -ll -f txt
+          bandit -r app/ -ll -f json -o reports/bandit.json
+
+      # ── pip-audit — CVEs en dependencias ────────────────────────────────────
+      - name: Ejecutar pip-audit
+        continue-on-error: true
+        run: |
+          pip-audit --requirement requirements.txt --format markdown \
+            > reports/pip-audit.md 2>&1 || true
+          cat reports/pip-audit.md
+
+      # ── Resumen en GitHub Actions Summary ───────────────────────────────────
+      - name: Publicar resumen de seguridad
+        if: always()
+        run: |
+          python3 << 'EOF'
+          import json, os
+
+          out = open(os.environ["GITHUB_STEP_SUMMARY"], "a")
+
+          # ── Bandit ──────────────────────────────────────────────────────────
+          out.write("## 🔒 Bandit — Análisis estático\n\n")
+          try:
+              with open("reports/bandit.json") as f:
+                  data = json.load(f)
+              results = data.get("results", [])
+              metrics = data.get("metrics", {}).get("_totals", {})
+              if not results:
+                  out.write("✅ Sin hallazgos.\n\n")
+              else:
+                  high   = metrics.get("SEVERITY.HIGH", 0)
+                  medium = metrics.get("SEVERITY.MEDIUM", 0)
+                  low    = metrics.get("SEVERITY.LOW", 0)
+                  out.write(f"**{len(results)} hallazgo(s)** — 🔴 High: {high} | 🟡 Medium: {medium} | 🔵 Low: {low}\n\n")
+                  out.write("| Severidad | Confianza | Archivo | Línea | Descripción |\n")
+                  out.write("|-----------|-----------|---------|-------|-------------|\n")
+                  for r in results:
+                      sev  = r["issue_severity"]
+                      icon = "🔴" if sev == "HIGH" else ("🟡" if sev == "MEDIUM" else "🔵")
+                      out.write(
+                          f"| {icon} {sev} | {r['issue_confidence']} "
+                          f"| `{r['filename']}` | {r['line_number']} "
+                          f"| {r['issue_text']} |\n"
+                      )
+                  out.write("\n")
+          except FileNotFoundError:
+              out.write("⚠️ Reporte no generado (bandit no pudo ejecutarse).\n\n")
+
+          # ── pip-audit ───────────────────────────────────────────────────────
+          out.write("## 📦 pip-audit — CVEs en dependencias\n\n")
+          try:
+              content = open("reports/pip-audit.md").read().strip()
+              if not content or "No known vulnerabilities found" in content:
+                  out.write("✅ Sin vulnerabilidades conocidas.\n\n")
+              else:
+                  out.write(content + "\n\n")
+          except FileNotFoundError:
+              out.write("⚠️ Reporte no generado (pip-audit no pudo ejecutarse).\n\n")
+
+          out.close()
+          EOF
+
+      # ── Artifact ─────────────────────────────────────────────────────────────
+      - name: Subir reportes
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: reports/
+          retention-days: 30
