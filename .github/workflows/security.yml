@@ -52,12 +52,12 @@ jobs:
 
     steps:
       - name: Checkout código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Ejecutar análisis Pysa
         # facebook/pysa-action instala Pyre + Pysa, ejecuta el análisis
         # y emite un archivo sarif.json con los hallazgos.
-        uses: facebook/pysa-action@0.0.1
+        uses: facebook/pysa-action
         with:
           repo-directory: "./app"
           requirements-path: "requirements.txt"
@@ -72,7 +72,7 @@ jobs:
           category: pysa
 
       - name: Subir SARIF como artefacto (respaldo)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: pysa-sarif-${{ github.run_id }}

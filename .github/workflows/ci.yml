@@ -78,10 +78,10 @@ jobs:
 
     steps:
       - name: Checkout código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configurar Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"
@@ -106,7 +106,7 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
 
       - name: Subir reporte JUnit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: junit-report
@@ -114,7 +114,7 @@ jobs:
           retention-days: 14
 
       - name: Subir reporte de cobertura
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report
@@ -122,7 +122,7 @@ jobs:
           retention-days: 14
 
       - name: Publicar resumen de cobertura en el PR
-        uses: orgoro/coverage@v3.2
+        uses: orgoro/coverage@v3
         if: github.event_name == 'pull_request'
         with:
           coverageFile: reports/coverage.xml
