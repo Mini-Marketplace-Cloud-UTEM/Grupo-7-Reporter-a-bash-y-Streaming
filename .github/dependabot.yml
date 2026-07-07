@@ -43,6 +43,10 @@ updates:
       # por pydantic mismo — solo actualizar manualmente junto con pydantic.
       - dependency-name: "pydantic-core"
         update-types: ["version-update:semver-patch", "version-update:semver-minor", "version-update:semver-major"]
+      # websockets>=16 es incompatible con realtime==2.31.0 (requiere websockets<16).
+      # Desbloquear solo cuando supabase/realtime soporte websockets>=16.
+      - dependency-name: "websockets"
+        update-types: ["version-update:semver-major"]
 
   # ── GitHub Actions ───────────────────────────────────────────────────────────
   - package-ecosystem: "github-actions"
