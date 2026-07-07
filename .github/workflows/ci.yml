@@ -11,17 +11,11 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
-      - develop
-    paths-ignore:
-      - "docs/**"
+    branches: [dev, prod, qa]
+    paths-ignore: ["docs/**"]
   pull_request:
-    branches:
-      - main
-      - develop
-    paths-ignore:
-      - "docs/**"
+    branches: [dev, prod, qa]
+    paths-ignore: ["docs/**"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
