@@ -1,6 +1,9 @@
+import asyncio
+import json
 from datetime import date
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_use_mocks, require_headers
@@ -38,6 +41,33 @@ async def get_sales_report(
     use_mocks: bool = Depends(get_use_mocks),
 ):
     return await analytics_service.get_sales_report(db, from_, to, use_mocks=use_mocks)
+
+
+@router.get(
+    "/stream/sales",
+    summary="Stream de métricas de ventas en tiempo real (SSE)",
+    description=(
+        "Emite el resumen de ventas consolidado cada 10 segundos usando Server-Sent Events. "
+        "Requiere los headers obligatorios (X-Request-Id, X-Correlation-Id, X-Consumer). "
+        "El stream se cierra automáticamente cuando el cliente desconecta."
+    ),
+)
+async def stream_sales(
+    request: Request,
+    _headers: dict = Depends(require_headers),
+    db: AsyncSession = Depends(get_db),
+    use_mocks: bool = Depends(get_use_mocks),
+):
+    # ponytail: reutiliza get_sales_report existente, sin duplicar lógica
+    async def event_generator():
+        while True:
+            if await request.is_disconnected():
+                break
+            summary = await analytics_service.get_sales_report(db, None, None, use_mocks=use_mocks)
+            yield f"data: {json.dumps(summary.model_dump())}\n\n"
+            await asyncio.sleep(10)
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @router.get(
