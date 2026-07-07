@@ -3,6 +3,9 @@ Pruebas unitarias para app/workers/pubsub_consumer.py.
 
 Verifica los handlers de eventos y el callback de Pub/Sub usando mocks
 para aislar la lógica del worker de la infraestructura real.
+
+Convención de eventType: UPPER_SNAKE_CASE.
+Payload de ShipmentDelivered: camelCase (shipmentId, orderId, deliveredAt).
 """
 
 import asyncio
@@ -29,7 +32,7 @@ from app.workers.pubsub_consumer import (
 
 
 def _payload_order_created() -> dict:
-    """Payload mínimo válido para un evento OrderCreated."""
+    """Payload mínimo válido para un evento ORDER_CREATED."""
     return {
         "orderId": "ORD-001",
         "totalAmount": "49990",
@@ -38,7 +41,7 @@ def _payload_order_created() -> dict:
 
 
 def _payload_payment_approved() -> dict:
-    """Payload mínimo válido para un evento PaymentApproved."""
+    """Payload mínimo válido para un evento PAYMENT_APPROVED."""
     return {
         "paymentId": "PAY-001",
         "orderId": "ORD-001",
@@ -47,7 +50,7 @@ def _payload_payment_approved() -> dict:
 
 
 def _payload_inventory_shortage() -> dict:
-    """Payload mínimo válido para un evento InventoryShortage."""
+    """Payload mínimo válido para un evento INVENTORY_SHORTAGE."""
     return {
         "productId": "P-100",
         "currentStock": 2,
@@ -56,11 +59,11 @@ def _payload_inventory_shortage() -> dict:
 
 
 def _payload_shipment_delivered() -> dict:
-    """Payload mínimo válido para un evento ShipmentDelivered."""
+    """Payload mínimo válido para un evento SHIPMENT_DELIVERED (camelCase)."""
     return {
-        "shipment_id": "SHP-001",
-        "order_id": "ORD-001",
-        "delivered_at": datetime.now(UTC).isoformat(),
+        "shipmentId": "SHP-001",
+        "orderId": "ORD-001",
+        "deliveredAt": datetime.now(UTC).isoformat(),
         "city": "Santiago",
     }
 
@@ -89,7 +92,7 @@ def _construir_mensaje_pubsub(event_type: str, payload: dict) -> MagicMock:
 
 @pytest.mark.asyncio
 async def test_handle_order_created_llama_upsert():
-    """El handler de OrderCreated debe llamar a upsert_sales_from_order y a log_order_status."""
+    """El handler de ORDER_CREATED debe llamar a upsert_sales_from_order y a log_order_status."""
     payload = _payload_order_created()
     correlation_id = str(uuid.uuid4())
 
@@ -179,7 +182,7 @@ async def test_handle_order_created_usa_status_del_payload_cuando_presente():
 
 @pytest.mark.asyncio
 async def test_handle_payment_approved_solo_loguea():
-    """El handler de PaymentApproved solo debe loguear, sin escribir en BD."""
+    """El handler de PAYMENT_APPROVED solo debe loguear, sin escribir en BD."""
     payload = _payload_payment_approved()
 
     with patch("app.workers.pubsub_consumer.logger") as mock_logger:
@@ -206,7 +209,7 @@ async def test_handle_payment_approved_payload_invalido_lanza_error():
 
 @pytest.mark.asyncio
 async def test_handle_inventory_shortage_loguea_warning():
-    """El handler de InventoryShortage debe emitir un warning con los datos del quiebre."""
+    """El handler de INVENTORY_SHORTAGE debe emitir un warning con los datos del quiebre."""
     payload = _payload_inventory_shortage()
 
     with patch("app.workers.pubsub_consumer.logger") as mock_logger:
@@ -233,7 +236,7 @@ async def test_handle_inventory_shortage_payload_invalido_lanza_error():
 
 @pytest.mark.asyncio
 async def test_handle_shipment_delivered_persiste_y_loguea():
-    """El handler de ShipmentDelivered debe persistir la entrega y loguear el evento."""
+    """El handler de SHIPMENT_DELIVERED debe persistir la entrega y loguear el evento."""
     payload = _payload_shipment_delivered()
 
     mock_session = AsyncMock()
@@ -281,9 +284,9 @@ async def test_handle_shipment_delivered_con_city_none():
     correctamente hasta la capa de persistencia.
     """
     payload = {
-        "shipment_id": "SHP-002",
-        "order_id": "ORD-002",
-        "delivered_at": datetime.now(UTC).isoformat(),
+        "shipmentId": "SHP-002",
+        "orderId": "ORD-002",
+        "deliveredAt": datetime.now(UTC).isoformat(),
         # city omitido intencionalmente
     }
 
@@ -313,11 +316,11 @@ async def test_handle_shipment_delivered_con_city_none():
 
 
 def test_make_callback_mensaje_valido_llama_ack():
-    """Con un mensaje válido de OrderCreated el callback debe llamar a ack()."""
+    """Con un mensaje válido de ORDER_CREATED el callback debe llamar a ack()."""
     loop = asyncio.new_event_loop()
     try:
         callback = _make_callback(loop)
-        message = _construir_mensaje_pubsub("OrderCreated", _payload_order_created())
+        message = _construir_mensaje_pubsub("ORDER_CREATED", _payload_order_created())
 
         # El future que devuelve run_coroutine_threadsafe
         mock_future = MagicMock()
@@ -337,7 +340,7 @@ def test_make_callback_tipo_desconocido_llama_ack():
     loop = asyncio.new_event_loop()
     try:
         callback = _make_callback(loop)
-        message = _construir_mensaje_pubsub("EventoInventado", {"foo": "bar"})
+        message = _construir_mensaje_pubsub("EVENTO_INVENTADO", {"foo": "bar"})
 
         with patch("app.workers.pubsub_consumer.logger") as mock_logger:
             callback(message)
@@ -354,7 +357,7 @@ def test_make_callback_excepcion_llama_nack():
     loop = asyncio.new_event_loop()
     try:
         callback = _make_callback(loop)
-        message = _construir_mensaje_pubsub("OrderCreated", _payload_order_created())
+        message = _construir_mensaje_pubsub("ORDER_CREATED", _payload_order_created())
 
         mock_future = MagicMock()
         mock_future.result.side_effect = Exception("timeout")
@@ -392,7 +395,7 @@ def test_make_callback_envelope_incompleto_llama_nack():
     try:
         callback = _make_callback(loop)
 
-        mensaje_incompleto = {"eventType": "OrderCreated"}  # Falta correlationId, etc.
+        mensaje_incompleto = {"eventType": "ORDER_CREATED"}  # Falta correlationId, etc.
         message = MagicMock()
         message.data = json.dumps(mensaje_incompleto).encode("utf-8")
         message.message_id = "msg-incomplete"
