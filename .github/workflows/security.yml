@@ -16,13 +16,9 @@ name: Security
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [dev, prod, qa]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [dev, prod, qa]
   schedule:
     # ── Lunes 08:00 UTC — detecta CVEs nuevos en dependencias ─────────────────
     - cron: "0 8 * * 1"
