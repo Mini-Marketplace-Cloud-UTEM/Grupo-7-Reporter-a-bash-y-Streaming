@@ -31,6 +31,49 @@ de mensajes en el canal de streaming.
 
 ---
 
+## Arquitectura
+
+```mermaid
+flowchart TB
+    subgraph upstream["Servicios upstream"]
+        direction LR
+        P1["Pedidos<br/>Grupo 5"]
+        P2["Pagos<br/>Grupo 8"]
+        P3["Inventario<br/>Grupo 4"]
+        P4["Despacho<br/>Grupo 6"]
+    end
+
+    PS["Google Cloud Pub/Sub<br/>4 topicos de eventos"]
+
+    subgraph g7["Servicio Grupo 7 (FastAPI)"]
+        W["Worker Pub/Sub<br/>Actualiza metricas en vivo"]
+        A["API REST<br/>6 endpoints de reportes"]
+        B["Batch recalculate<br/>Reprocesa logs crudos"]
+    end
+
+    DB[("Supabase Postgres<br/>Tablas analiticas")]
+    ST[("Supabase Storage<br/>Logs crudos de eventos")]
+    BFF["BFF (Grupo 1)"]
+
+    P1 --> PS
+    P2 --> PS
+    P3 --> PS
+    P4 --> PS
+    PS --> W
+    W --> DB
+    W --> ST
+    ST -. lee logs .-> B
+    B -- recalcula --> DB
+    A -- lee --> DB
+    A --> BFF
+```
+
+El worker consume los cuatro topicos en simultaneo y actualiza las tablas analiticas al
+vuelo. Si se pierden mensajes en el canal de streaming, el proceso batch relee los logs
+crudos desde Supabase Storage y reconstruye las agregaciones sin depender de Pub/Sub.
+
+---
+
 ## Caracteristicas
 
 - **Streaming en tiempo real** — Worker asincrono basado en `google-cloud-pubsub` que
@@ -41,6 +84,9 @@ de mensajes en el canal de streaming.
   productos mas vendidos, ticket promedio, horas pico y rendimiento de despacho.
 - **Trazabilidad distribuida** — Todos los endpoints exigen `X-Request-Id`,
   `X-Correlation-Id` y `X-Consumer` como UUID validos.
+- **Modo mock de errores HTTP** — Middleware opcional que fuerza codigos de estado
+  arbitrarios via headers, para que los consumidores prueben manejo de errores sin
+  provocar fallos reales.
 - **Documentacion interactiva** — Swagger UI disponible en `/docs` y ReDoc en `/redoc`
   generados automaticamente por FastAPI.
 - **Healthcheck** — Endpoint `GET /health` listo para sondas de Docker y Kubernetes.
@@ -117,6 +163,7 @@ Edita `.env` y completa todos los valores:
 |----------|-------------|---------|
 | `APP_ENV` | Entorno de ejecucion | `development` |
 | `APP_PORT` | Puerto en que escucha el servidor | `8070` |
+| `USE_MOCKS` | Activa el middleware de mock de codigos HTTP (ver seccion "Modo mock") | `false` |
 | `SUPABASE_URL` | URL del proyecto Supabase | `https://xxxx.supabase.co` |
 | `SUPABASE_PUBLISHABLE_KEY` | Clave publica de Supabase (antes `anon_key`), para uso en cliente/frontend | `eyJhbGci...` |
 | `SUPABASE_SECRET_KEY` | Clave secreta de Supabase (antes `service_role_key`), con privilegios elevados para uso en backend | `eyJhbGci...` |
@@ -207,6 +254,45 @@ Todos los endpoints requieren los siguientes headers en cada solicitud:
 
 ---
 
+## Modo mock (simulacion de errores HTTP)
+
+Para que los servicios consumidores (por ejemplo el BFF del Grupo 1) puedan probar su
+manejo de errores sin depender de fallos reales, el servicio incluye un middleware
+opcional que fuerza el `status_code` de la respuesta.
+
+**Activacion:**
+
+1. Definir `USE_MOCKS=true` en el entorno del servicio (variable de la seccion anterior).
+2. En cada request que se quiera simular, enviar los headers:
+
+| Header | Descripcion |
+|--------|-------------|
+| `X-USE-MOCKS` | Debe valer `true` para activar el mock en esa request puntual. |
+| `X-MOCK-HTTP-STATUS` | Codigo HTTP entero (100–599) que reemplazara el status real de la respuesta. |
+
+**Comportamiento:**
+
+- Si `USE_MOCKS=false` en el entorno → el middleware es transparente (no-op), sin importar los headers.
+- Si `USE_MOCKS=true` pero falta `X-USE-MOCKS: true` → transparente (no-op).
+- Si ambas condiciones se cumplen pero `X-MOCK-HTTP-STATUS` esta ausente o no es un entero valido → la respuesta pasa sin modificaciones.
+- Si ambas condiciones se cumplen y el header trae un entero HTTP valido → se reemplaza el `status_code` de la respuesta por ese valor.
+
+Ejemplo, forzando un `503` en el endpoint de ventas:
+
+```bash
+curl http://localhost:8070/reports/sales \
+  -H "X-Request-Id: $(uuidgen)" \
+  -H "X-Correlation-Id: $(uuidgen)" \
+  -H "X-Consumer: group-01" \
+  -H "X-USE-MOCKS: true" \
+  -H "X-MOCK-HTTP-STATUS: 503"
+```
+
+> Este modo solo debe habilitarse en entornos de desarrollo o pruebas de integracion,
+> nunca en produccion.
+
+---
+
 ## Proceso batch desde CLI
 
 El script `scripts/batch_recalculate.py` puede ejecutarse de forma independiente,
@@ -264,6 +350,8 @@ El worker consume mensajes que siguen el envelope estandar del Mini Marketplace:
 │   │       └── reports.py        # GET /reports/*
 │   ├── db/
 │   │   └── session.py            # Motor asincrono SQLAlchemy + dependencia FastAPI
+│   ├── middleware/
+│   │   └── mock_status.py        # Middleware de mock de codigos HTTP (X-USE-MOCKS)
 │   ├── models/
 │   │   └── analytics.py          # ORM: FactSalesSummary, AggTopProduct, BatchJob, etc.
 │   ├── schemas/
@@ -271,7 +359,8 @@ El worker consume mensajes que siguen el envelope estandar del Mini Marketplace:
 │   │   └── responses.py          # Pydantic: respuestas de cada endpoint
 │   ├── services/
 │   │   ├── analytics_service.py  # Logica de negocio y upserts en tiempo real
-│   │   └── batch_service.py      # Recalculo batch desde Supabase Storage
+│   │   ├── batch_service.py      # Recalculo batch desde Supabase Storage
+│   │   └── mock_data.py          # Datos de ejemplo para modo mock
 │   ├── workers/
 │   │   └── pubsub_consumer.py    # Consumidor asincrono de Google Cloud Pub/Sub
 │   ├── config.py                 # Settings via pydantic-settings (carga .env)
