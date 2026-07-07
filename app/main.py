@@ -162,13 +162,26 @@ app.add_middleware(MockStatusMiddleware)
 
 
 @app.middleware("http")
-async def inject_request_id(request: Request, call_next):
+async def add_traceability_headers(request: Request, call_next):
+    # Generar o capturar UUIDs
+    correlation_id = request.headers.get("X-Correlation-Id", str(uuid.uuid4()))
     request_id = request.headers.get("X-Request-Id", str(uuid.uuid4()))
-    correlation_id = request.headers.get("X-Correlation-Id", "")
+    
+    # Log de entrada
+    logger.info(f"📥 REQUEST IN | Path: {request.url.path} | CorrelationID: {correlation_id} | RequestID: {request_id}")
+    
+    request.state.correlation_id = correlation_id
+    request.state.request_id = request_id
+    
     response = await call_next(request)
+    
+    # Inyectar a la salida
+    response.headers["X-Correlation-Id"] = correlation_id
     response.headers["X-Request-Id"] = request_id
-    if correlation_id:
-        response.headers["X-Correlation-Id"] = correlation_id
+    
+    # Log de salida
+    logger.info(f"📤 RESPONSE OUT | Status: {response.status_code} | CorrelationID: {correlation_id}")
+    
     return response
 
 
