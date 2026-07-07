@@ -4,6 +4,8 @@ Worker de consumo de eventos desde Google Cloud Pub/Sub.
 Se suscribe a los cuatro tópicos del ecosistema y despacha cada mensaje
 al handler correspondiente según el campo eventType del envelope estándar.
 Implementa reintentos con Exponential Backoff (máximo 5 intentos) usando tenacity.
+
+Convención de eventType: UPPER_SNAKE_CASE (ej: ORDER_CREATED, SHIPMENT_DELIVERED).
 """
 
 import asyncio
@@ -84,27 +86,27 @@ async def _handle_shipment_delivered(payload: dict, correlation_id: str) -> None
     async with AsyncSessionLocal() as db:
         await log_shipment_delivery(
             db,
-            shipment_id=data.shipment_id,
-            order_id=data.order_id,
-            delivered_at=data.delivered_at,
+            shipment_id=data.shipmentId,
+            order_id=data.orderId,
+            delivered_at=data.deliveredAt,
             city=data.city,
-            delivery_time_minutes=None,  # el payload de ShipmentDelivered no incluye este campo
+            delivery_time_minutes=None,  # el payload de SHIPMENT_DELIVERED no incluye este campo
         )
     logger.info(
         "evento_shipment_delivered envioId=%s pedidoId=%s ciudad=%s correlationId=%s",
-        data.shipment_id,
-        data.order_id,
+        data.shipmentId,
+        data.orderId,
         data.city,
         correlation_id,
     )
 
 
-# Mapa de tipo de evento a su handler correspondiente
+# Mapa de tipo de evento (UPPER_SNAKE_CASE) a su handler correspondiente
 _HANDLERS = {
-    "OrderCreated": _handle_order_created,
-    "PaymentApproved": _handle_payment_approved,
-    "InventoryShortage": _handle_inventory_shortage,
-    "ShipmentDelivered": _handle_shipment_delivered,
+    "ORDER_CREATED": _handle_order_created,
+    "PAYMENT_APPROVED": _handle_payment_approved,
+    "INVENTORY_SHORTAGE": _handle_inventory_shortage,
+    "SHIPMENT_DELIVERED": _handle_shipment_delivered,
 }
 
 
