@@ -29,16 +29,14 @@ class Settings(BaseSettings):
     SUPABASE_SECRET_KEY: str = ""
     DATABASE_URL: str = ""
 
-    # Google Cloud — credenciales y proyecto
-    GOOGLE_CLOUD_PROJECT: str = ""
-    # Contenido del JSON de la service account codificado en base64
-    GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT: str = ""
-
-    # Google Cloud Pub/Sub — suscripciones a los tópicos de eventos upstream
-    PUBSUB_SUBSCRIPTION_ORDER_CREATED: str = ""
-    PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED: str = ""
-    PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE: str = ""
-    PUBSUB_SUBSCRIPTION_SHIPMENT_DELIVERED: str = ""
+    # Google Cloud — credenciales de service account por grupo upstream.
+    # Cada tipo de evento lo publica un grupo distinto, con su propio proyecto GCP
+    # y su propia service account (ver app/workers/pubsub_consumer.py — _EVENT_SOURCES).
+    # Contenido del JSON de la service account codificado en base64.
+    G4_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT: str = ""  # Grupo 4 — Inventario
+    G5_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT: str = ""  # Grupo 5 — Pedidos
+    G6_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT: str = ""  # Grupo 6 — Despacho
+    G8_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT: str = ""  # Grupo 8 — Pagos
 
 
 settings = Settings()
