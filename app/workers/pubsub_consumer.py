@@ -56,7 +56,10 @@ _EVENT_SOURCES: dict[str, tuple[str, str]] = {
         "G4",
         "projects/proyecto-arqui-g4/subscriptions/<pendiente-confirmar-con-g4>",
     ),
-    "PAYMENT_APPROVED": ("G8","projects/project-76891426-ab92-49ba-b24/subscriptions/g7-payment-events-sub"),
+    "PAYMENT_APPROVED": (
+        "G8",
+        "projects/project-76891426-ab92-49ba-b24/subscriptions/g7-payment-events-sub",
+    ),
     "SHIPMENT_DELIVERED": ("G6", "projects/proyecto-arqui-g6/subscriptions/g7-registro-sub"),
 }
 
