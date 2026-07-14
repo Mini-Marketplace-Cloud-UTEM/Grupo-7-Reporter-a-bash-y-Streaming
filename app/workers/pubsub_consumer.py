@@ -48,7 +48,9 @@ def _build_credentials() -> service_account.Credentials | None:
         return None
     try:
         key_data = json.loads(base64.b64decode(raw))
-        return service_account.Credentials.from_service_account_info(key_data, scopes=_PUBSUB_SCOPES)
+        return service_account.Credentials.from_service_account_info(
+            key_data, scopes=_PUBSUB_SCOPES
+        )
     except Exception:
         logger.exception("error_decodificando_credenciales_gcp — se usará ADC como fallback")
         return None
