@@ -9,12 +9,14 @@ Convención de eventType: UPPER_SNAKE_CASE (ej: ORDER_CREATED, SHIPMENT_DELIVERE
 """
 
 import asyncio
+import base64
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from decimal import Decimal
 
 from google.cloud import pubsub_v1
+from google.oauth2 import service_account
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.config import settings
@@ -35,6 +37,23 @@ from app.services.analytics_service import (
 logger = logging.getLogger(__name__)
 
 _executor = ThreadPoolExecutor(max_workers=4)
+
+_PUBSUB_SCOPES = ["https://www.googleapis.com/auth/pubsub"]
+
+
+def _build_credentials() -> service_account.Credentials | None:
+    """Decodifica GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT (base64 → JSON) y retorna credenciales."""
+    raw = settings.GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT
+    if not raw:
+        return None
+    try:
+        key_data = json.loads(base64.b64decode(raw))
+        return service_account.Credentials.from_service_account_info(
+            key_data, scopes=_PUBSUB_SCOPES
+        )
+    except Exception:
+        logger.exception("error_decodificando_credenciales_gcp — se usará ADC como fallback")
+        return None
 
 
 @retry(wait=wait_exponential(multiplier=1, min=2, max=30), stop=stop_after_attempt(5), reraise=True)
@@ -142,7 +161,8 @@ def _make_callback(loop: asyncio.AbstractEventLoop):
 async def start_consumers() -> list:
     """Inicia la suscripción a las cuatro colas de Pub/Sub y retorna los futures activos."""
     loop = asyncio.get_running_loop()
-    subscriber = pubsub_v1.SubscriberClient()
+    credentials = _build_credentials()
+    subscriber = pubsub_v1.SubscriberClient(credentials=credentials)
     callback = _make_callback(loop)
 
     subscriptions = [

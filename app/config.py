@@ -29,8 +29,12 @@ class Settings(BaseSettings):
     SUPABASE_SECRET_KEY: str = ""
     DATABASE_URL: str = ""
 
-    # Google Cloud Pub/Sub — suscripciones a los tópicos de eventos upstream
+    # Google Cloud — credenciales y proyecto
     GOOGLE_CLOUD_PROJECT: str = ""
+    # Contenido del JSON de la service account codificado en base64
+    GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT: str = ""
+
+    # Google Cloud Pub/Sub — suscripciones a los tópicos de eventos upstream
     PUBSUB_SUBSCRIPTION_ORDER_CREATED: str = ""
     PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED: str = ""
     PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE: str = ""
