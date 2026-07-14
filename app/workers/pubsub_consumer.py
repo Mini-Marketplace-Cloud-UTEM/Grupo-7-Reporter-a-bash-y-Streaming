@@ -1,8 +1,11 @@
 """
 Worker de consumo de eventos desde Google Cloud Pub/Sub.
 
-Se suscribe a los cuatro tópicos del ecosistema y despacha cada mensaje
-al handler correspondiente según el campo eventType del envelope estándar.
+Cada tipo de evento es publicado por un grupo upstream distinto, con su propio
+proyecto GCP y su propia service account (ver _EVENT_SOURCES). Por eso se
+autentica con múltiples service accounts y se mantiene un SubscriberClient por
+grupo (cacheado, no uno por evento). Cada mensaje se despacha al handler
+correspondiente según el campo eventType del envelope estándar.
 Implementa reintentos con Exponential Backoff (máximo 5 intentos) usando tenacity.
 
 Convención de eventType: UPPER_SNAKE_CASE (ej: ORDER_CREATED, SHIPMENT_DELIVERED).
@@ -40,11 +43,34 @@ _executor = ThreadPoolExecutor(max_workers=4)
 
 _PUBSUB_SCOPES = ["https://www.googleapis.com/auth/pubsub"]
 
+# Mapa de eventType -> (grupo upstream, subscription path completo).
+# Cada grupo publica desde su propio proyecto GCP con su propia service account.
+# Los subscription IDs marcados como "pendiente-confirmar" son placeholders:
+# actualizar cuando el grupo correspondiente confirme el path real.
+_EVENT_SOURCES: dict[str, tuple[str, str]] = {
+    "ORDER_CREATED": (
+        "G5",
+        "projects/proyecto-arqui-g5/subscriptions/<pendiente-confirmar-con-g5>",
+    ),
+    "INVENTORY_SHORTAGE": (
+        "G4",
+        "projects/proyecto-arqui-g4/subscriptions/<pendiente-confirmar-con-g4>",
+    ),
+    "PAYMENT_APPROVED": (
+        "G8",
+        "projects/project-76891426-ab92-49ba-b24/subscriptions/g7-payment-events-sub",
+    ),
+    "SHIPMENT_DELIVERED": ("G6", "projects/proyecto-arqui-g6/subscriptions/g7-registro-sub"),
+}
 
-def _build_credentials() -> service_account.Credentials | None:
-    """Decodifica GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT (base64 → JSON) y retorna credenciales."""
-    raw = settings.GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT
+
+def _build_credentials(group: str) -> service_account.Credentials | None:
+    """Decodifica la service account key (base64 → JSON) del grupo dado y retorna credenciales."""
+    raw = getattr(settings, f"{group}_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT")
     if not raw:
+        logger.warning(
+            "credenciales_gcp_no_configuradas grupo=%s — se usará ADC como fallback", group
+        )
         return None
     try:
         key_data = json.loads(base64.b64decode(raw))
@@ -52,7 +78,9 @@ def _build_credentials() -> service_account.Credentials | None:
             key_data, scopes=_PUBSUB_SCOPES
         )
     except Exception:
-        logger.exception("error_decodificando_credenciales_gcp — se usará ADC como fallback")
+        logger.exception(
+            "error_decodificando_credenciales_gcp grupo=%s — se usará ADC como fallback", group
+        )
         return None
 
 
@@ -159,26 +187,26 @@ def _make_callback(loop: asyncio.AbstractEventLoop):
 
 
 async def start_consumers() -> list:
-    """Inicia la suscripción a las cuatro colas de Pub/Sub y retorna los futures activos."""
+    """Inicia la suscripción a las colas de Pub/Sub de cada grupo y retorna los futures activos."""
     loop = asyncio.get_running_loop()
-    credentials = _build_credentials()
-    subscriber = pubsub_v1.SubscriberClient(credentials=credentials)
     callback = _make_callback(loop)
 
-    subscriptions = [
-        settings.PUBSUB_SUBSCRIPTION_ORDER_CREATED,
-        settings.PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED,
-        settings.PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE,
-        settings.PUBSUB_SUBSCRIPTION_SHIPMENT_DELIVERED,
-    ]
+    # Un SubscriberClient por grupo (cacheado), no uno por evento.
+    clients: dict[str, pubsub_v1.SubscriberClient] = {}
 
     futures = []
-    for sub in subscriptions:
-        if not sub:
+    for event_type, (group, sub) in _EVENT_SOURCES.items():
+        if not sub or "pendiente-confirmar" in sub:
+            logger.warning("suscripcion_pendiente_confirmar grupo=%s evento=%s", group, event_type)
             continue
-        future = subscriber.subscribe(sub, callback=callback)
+
+        if group not in clients:
+            credentials = _build_credentials(group)
+            clients[group] = pubsub_v1.SubscriberClient(credentials=credentials)
+
+        future = clients[group].subscribe(sub, callback=callback)
         futures.append(future)
-        logger.info("suscripcion_pubsub_activa suscripcion=%s", sub)
+        logger.info("suscripcion_pubsub_activa grupo=%s suscripcion=%s", group, sub)
 
     return futures
 

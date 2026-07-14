@@ -1,14 +1,17 @@
 """
 Pruebas unitarias para app/workers/pubsub_consumer.py.
 
-Verifica los handlers de eventos y el callback de Pub/Sub usando mocks
-para aislar la lógica del worker de la infraestructura real.
+Verifica los handlers de eventos, el callback de Pub/Sub y la suscripción
+multi-grupo (un SubscriberClient cacheado por grupo upstream, autenticado
+con su propia service account) usando mocks para aislar la lógica del
+worker de la infraestructura real.
 
 Convención de eventType: UPPER_SNAKE_CASE.
 Payload de ShipmentDelivered: camelCase (shipmentId, orderId, deliveredAt).
 """
 
 import asyncio
+import base64
 import json
 import uuid
 from datetime import UTC, datetime
@@ -17,6 +20,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from app.workers.pubsub_consumer import (
+    _build_credentials,
     _handle_inventory_shortage,
     _handle_order_created,
     _handle_payment_approved,
@@ -438,27 +442,155 @@ async def test_stop_consumers_un_future():
 
 
 # ---------------------------------------------------------------------------
-# start_consumers con suscripciones vacías
+# start_consumers — suscripción multi-grupo
 # ---------------------------------------------------------------------------
+# Se inyecta un _EVENT_SOURCES de prueba vía patch en vez de depender de los
+# valores reales (que son placeholders temporales "pendiente-confirmar" que
+# cambiarán cuando G4/G5/G8 confirmen sus subscription paths).
 
 
 @pytest.mark.asyncio
-async def test_start_consumers_suscripciones_vacias_retorna_lista_vacia():
-    """Con todas las suscripciones configuradas como cadena vacía debe retornar lista vacía."""
+async def test_start_consumers_salta_suscripciones_pendiente_confirmar():
+    """Las entradas con path placeholder 'pendiente-confirmar' no deben suscribirse."""
+    fake_sources = {
+        "EVENTO_A": ("G4", "projects/p4/subscriptions/<pendiente-confirmar-con-g4>"),
+        "EVENTO_B": ("G5", ""),
+    }
     mock_subscriber = MagicMock()
 
     with (
+        patch("app.workers.pubsub_consumer._EVENT_SOURCES", fake_sources),
         patch(
             "app.workers.pubsub_consumer.pubsub_v1.SubscriberClient", return_value=mock_subscriber
         ),
-        patch("app.workers.pubsub_consumer.settings") as mock_settings,
+        patch("app.workers.pubsub_consumer._build_credentials", return_value=None),
     ):
-        mock_settings.PUBSUB_SUBSCRIPTION_ORDER_CREATED = ""
-        mock_settings.PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED = ""
-        mock_settings.PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE = ""
-        mock_settings.PUBSUB_SUBSCRIPTION_SHIPMENT_DELIVERED = ""
-
         futures = await start_consumers()
 
     assert futures == []
     mock_subscriber.subscribe.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_start_consumers_suscribe_entradas_con_path_real():
+    """Una entrada con subscription path real debe suscribirse usando el SubscriberClient del grupo."""
+    fake_sources = {
+        "EVENTO_PENDIENTE": ("G4", "projects/p4/subscriptions/<pendiente-confirmar-con-g4>"),
+        "EVENTO_REAL": ("G6", "projects/proyecto-arqui-g6/subscriptions/g7-registro-sub"),
+    }
+    mock_subscriber = MagicMock()
+    mock_future = MagicMock()
+    mock_subscriber.subscribe.return_value = mock_future
+
+    with (
+        patch("app.workers.pubsub_consumer._EVENT_SOURCES", fake_sources),
+        patch(
+            "app.workers.pubsub_consumer.pubsub_v1.SubscriberClient", return_value=mock_subscriber
+        ),
+        patch("app.workers.pubsub_consumer._build_credentials", return_value=None),
+    ):
+        futures = await start_consumers()
+
+    assert futures == [mock_future]
+    mock_subscriber.subscribe.assert_called_once()
+    call_args = mock_subscriber.subscribe.call_args
+    assert call_args.args[0] == "projects/proyecto-arqui-g6/subscriptions/g7-registro-sub"
+
+
+@pytest.mark.asyncio
+async def test_start_consumers_reusa_client_del_mismo_grupo():
+    """Dos eventos reales del mismo grupo deben reusar el mismo SubscriberClient (no crear dos)."""
+    fake_sources = {
+        "EVENTO_UNO": ("G6", "projects/proyecto-arqui-g6/subscriptions/sub-uno"),
+        "EVENTO_DOS": ("G6", "projects/proyecto-arqui-g6/subscriptions/sub-dos"),
+    }
+    mock_subscriber = MagicMock()
+
+    with (
+        patch("app.workers.pubsub_consumer._EVENT_SOURCES", fake_sources),
+        patch(
+            "app.workers.pubsub_consumer.pubsub_v1.SubscriberClient", return_value=mock_subscriber
+        ) as mock_client_cls,
+        patch("app.workers.pubsub_consumer._build_credentials", return_value=None),
+    ):
+        futures = await start_consumers()
+
+    assert len(futures) == 2
+    mock_client_cls.assert_called_once()
+    assert mock_subscriber.subscribe.call_count == 2
+
+
+# ---------------------------------------------------------------------------
+# _build_credentials
+# ---------------------------------------------------------------------------
+
+
+def test_build_credentials_sin_contenido_retorna_none_y_loguea_warning():
+    """Si la variable de settings del grupo está vacía debe retornar None y loguear warning."""
+    with (
+        patch("app.workers.pubsub_consumer.settings") as mock_settings,
+        patch("app.workers.pubsub_consumer.logger") as mock_logger,
+    ):
+        mock_settings.G6_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT = ""
+
+        result = _build_credentials("G6")
+
+    assert result is None
+    mock_logger.warning.assert_called_once()
+
+
+def test_build_credentials_contenido_valido_retorna_credenciales():
+    """Con base64 válido debe decodificar el JSON y construir las credenciales."""
+    key_data = {"type": "service_account", "project_id": "proyecto-arqui-g6"}
+    raw_b64 = base64.b64encode(json.dumps(key_data).encode("utf-8")).decode("utf-8")
+    mock_credentials = MagicMock()
+
+    with (
+        patch("app.workers.pubsub_consumer.settings") as mock_settings,
+        patch(
+            "app.workers.pubsub_consumer.service_account.Credentials.from_service_account_info",
+            return_value=mock_credentials,
+        ) as mock_from_info,
+    ):
+        mock_settings.G6_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT = raw_b64
+
+        result = _build_credentials("G6")
+
+    assert result is mock_credentials
+    mock_from_info.assert_called_once()
+    assert mock_from_info.call_args.args[0] == key_data
+
+
+def test_build_credentials_contenido_invalido_retorna_none_y_loguea_exception():
+    """Con contenido que no decodifica a JSON válido debe retornar None y loguear exception."""
+    with (
+        patch("app.workers.pubsub_consumer.settings") as mock_settings,
+        patch("app.workers.pubsub_consumer.logger") as mock_logger,
+    ):
+        mock_settings.G4_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT = "esto-no-es-base64-valido{{{"
+
+        result = _build_credentials("G4")
+
+    assert result is None
+    mock_logger.exception.assert_called_once()
+
+
+def test_build_credentials_usa_la_variable_del_grupo_correcto():
+    """Debe leer settings.<GRUPO>_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT, no la de otro grupo."""
+    key_data_g6 = {"project_id": "proyecto-g6"}
+    key_data_g4 = {"project_id": "proyecto-g4"}
+    raw_g6 = base64.b64encode(json.dumps(key_data_g6).encode("utf-8")).decode("utf-8")
+    raw_g4 = base64.b64encode(json.dumps(key_data_g4).encode("utf-8")).decode("utf-8")
+
+    with (
+        patch("app.workers.pubsub_consumer.settings") as mock_settings,
+        patch(
+            "app.workers.pubsub_consumer.service_account.Credentials.from_service_account_info",
+            side_effect=lambda data, scopes: data,
+        ),
+    ):
+        mock_settings.G6_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT = raw_g6
+        mock_settings.G4_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT = raw_g4
+
+        assert _build_credentials("G6") == key_data_g6
+        assert _build_credentials("G4") == key_data_g4

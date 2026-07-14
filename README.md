@@ -168,11 +168,15 @@ Edita `.env` y completa todos los valores:
 | `SUPABASE_PUBLISHABLE_KEY` | Clave publica de Supabase (antes `anon_key`), para uso en cliente/frontend | `eyJhbGci...` |
 | `SUPABASE_SECRET_KEY` | Clave secreta de Supabase (antes `service_role_key`), con privilegios elevados para uso en backend | `eyJhbGci...` |
 | `DATABASE_URL` | Cadena de conexion asyncpg a Postgres | `postgresql+asyncpg://user:pass@host:5432/dbname` |
-| `GOOGLE_CLOUD_PROJECT` | ID del proyecto de Google Cloud | `mi-proyecto-gcp` |
-| `PUBSUB_SUBSCRIPTION_ORDER_CREATED` | Ruta completa de la suscripcion de pedidos creados | `projects/xxx/subscriptions/order-created-sub` |
-| `PUBSUB_SUBSCRIPTION_PAYMENT_APPROVED` | Ruta completa de la suscripcion de pagos aprobados | `projects/xxx/subscriptions/payment-approved-sub` |
-| `PUBSUB_SUBSCRIPTION_INVENTORY_SHORTAGE` | Ruta completa de la suscripcion de quiebre de inventario | `projects/xxx/subscriptions/inventory-shortage-sub` |
-| `PUBSUB_SUBSCRIPTION_SHIPMENT_DELIVERED` | Ruta completa de la suscripcion de envios entregados | `projects/xxx/subscriptions/shipment-delivered-sub` |
+| `G4_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT` | JSON (base64) de la service account de Grupo 4 - Inventario, para autenticar el `SubscriberClient` | `eyJ0eXBlIjogInNlcnZpY2Vf...` |
+| `G5_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT` | JSON (base64) de la service account de Grupo 5 - Pedidos | `eyJ0eXBlIjogInNlcnZpY2Vf...` |
+| `G6_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT` | JSON (base64) de la service account de Grupo 6 - Despacho | `eyJ0eXBlIjogInNlcnZpY2Vf...` |
+| `G8_GOOGLE_CLOUD_SERVICE_ACCOUNT_KEY_CONTENT` | JSON (base64) de la service account de Grupo 8 - Pagos | `eyJ0eXBlIjogInNlcnZpY2Vf...` |
+
+Las rutas de las suscripciones de Pub/Sub (una por grupo/proyecto GCP upstream)
+no son configurables por variable de entorno: estan hardcodeadas en
+`app/workers/pubsub_consumer.py` (dict `_EVENT_SOURCES`), ya que cada grupo
+publica en su propio proyecto de Google Cloud.
 
 ### 5. Aplicar el schema de base de datos
 
